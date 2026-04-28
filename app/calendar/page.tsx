@@ -3,19 +3,15 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { format, addMonths, subMonths, addWeeks, subWeeks, startOfWeek, endOfWeek, getMonth, getYear } from "date-fns";
+import { format, addMonths, subMonths, getMonth, getYear } from "date-fns";
 import { BIRTHDAY_KEY } from "@/components/BirthdayForm";
 import MonthView from "@/components/calendar/MonthView";
-import WeekView from "@/components/calendar/WeekView";
 import type { DealWithOccurrences } from "@/lib/deals";
 import DayModal from "@/components/calendar/DayModal";
-
-export type CalendarView = "month" | "week";
 
 export default function CalendarPage() {
   const router = useRouter();
   const [birthday, setBirthday] = useState<string | null>(null);
-  const [view, setView] = useState<CalendarView>("month");
   const [cursor, setCursor] = useState(new Date());
   const [dayMap, setDayMap] = useState<Record<string, DealWithOccurrences[]>>({});
   const [loadingDeals, setLoadingDeals] = useState(false);
@@ -31,51 +27,27 @@ export default function CalendarPage() {
   }, [router]);
 
   const fetchDeals = useCallback(
-    async (date: Date, bday: string, currentView: CalendarView) => {
+    async (date: Date, bday: string) => {
       setLoadingDeals(true);
-
-      const months: Array<{ y: number; m: number }> = [{ y: getYear(date), m: getMonth(date) + 1 }];
-
-      if (currentView === "week") {
-        const wStart = startOfWeek(date);
-        const wEnd = endOfWeek(date);
-        if (getMonth(wStart) !== getMonth(date)) {
-          months.unshift({ y: getYear(wStart), m: getMonth(wStart) + 1 });
-        }
-        if (getMonth(wEnd) !== getMonth(date)) {
-          months.push({ y: getYear(wEnd), m: getMonth(wEnd) + 1 });
-        }
-      }
-
-      const results = await Promise.all(
-        months.map(({ y, m }) =>
-          fetch(`/api/deals?year=${y}&month=${m}&birthday=${bday}`).then((r) => r.json()),
-        ),
-      );
-
-      setDayMap(Object.assign({}, ...results));
+      const y = getYear(date);
+      const m = getMonth(date) + 1;
+      const res = await fetch(`/api/deals?year=${y}&month=${m}&birthday=${bday}`);
+      setDayMap(await res.json());
       setLoadingDeals(false);
     },
     [],
   );
 
   useEffect(() => {
-    if (birthday) fetchDeals(cursor, birthday, view);
-  }, [birthday, cursor, view, fetchDeals]);
+    if (birthday) fetchDeals(cursor, birthday);
+  }, [birthday, cursor, fetchDeals]);
 
   if (!birthday) return null;
 
-  const title =
-    view === "month"
-      ? format(cursor, "MMMM yyyy")
-      : `${format(startOfWeek(cursor), "MMM d")} – ${format(endOfWeek(cursor), "MMM d, yyyy")}`;
+  const title = format(cursor, "MMMM yyyy");
 
-  function prev() {
-    setCursor((c) => view === "week" ? subWeeks(c, 1) : subMonths(c, 1));
-  }
-  function next() {
-    setCursor((c) => view === "week" ? addWeeks(c, 1) : addMonths(c, 1));
-  }
+  function prev() { setCursor((c) => subMonths(c, 1)); }
+  function next() { setCursor((c) => addMonths(c, 1)); }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -88,26 +60,6 @@ export default function CalendarPage() {
           <span style={{ color: "var(--color-terracotta)" }}>free</span>
           <span style={{ color: "var(--color-forest)" }}>bites</span>
         </span>
-
-        {/* view toggle */}
-        <div
-          className="flex rounded-xl overflow-hidden border text-sm font-semibold"
-          style={{ borderColor: "var(--border)" }}
-        >
-          {(["month", "week"] as CalendarView[]).map((v) => (
-            <button
-              key={v}
-              onClick={() => setView(v)}
-              className="px-4 py-2 capitalize transition-colors"
-              style={{
-                background: view === v ? "var(--color-terracotta)" : "var(--card)",
-                color: view === v ? "var(--color-cream)" : "var(--color-warm-gray)",
-              }}
-            >
-              {v}
-            </button>
-          ))}
-        </div>
 
         <div className="flex items-center gap-3">
           <Link href="/map" className="text-sm font-medium" style={{ color: "var(--color-forest)" }}>
@@ -154,24 +106,13 @@ export default function CalendarPage() {
 
       {/* calendar body */}
       <div className="flex-1 p-4">
-        {view === "month" && (
-          <MonthView
-            cursor={cursor}
-            birthday={birthday}
-            dayMap={dayMap}
-            loading={loadingDeals}
-            onDayClick={setSelectedDay}
-          />
-        )}
-        {view === "week" && (
-          <WeekView
-            cursor={cursor}
-            birthday={birthday}
-            dayMap={dayMap}
-            loading={loadingDeals}
-            onDayClick={setSelectedDay}
-          />
-        )}
+        <MonthView
+          cursor={cursor}
+          birthday={birthday}
+          dayMap={dayMap}
+          loading={loadingDeals}
+          onDayClick={setSelectedDay}
+        />
       </div>
 
       {/* day detail modal */}
