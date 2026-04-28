@@ -90,6 +90,12 @@
   html {
     @apply font-sans;
   }
+  button, a, [role="button"], label[for], select {
+    cursor: pointer;
+  }
+  input[type="date"], input[type="text"], input[type="email"], textarea {
+    cursor: text;
+  }
 }
 
 @keyframes fb-float {
