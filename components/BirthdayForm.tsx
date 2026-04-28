@@ -22,9 +22,12 @@ export default function BirthdayForm() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!value) return;
+    if (value > new Date().toISOString().split("T")[0]) return;
     localStorage.setItem(BIRTHDAY_KEY, value);
     router.push("/calendar");
   }
+
+  const today = new Date().toISOString().split("T")[0];
 
   if (loading) return null;
 
@@ -42,6 +45,7 @@ export default function BirthdayForm() {
           id="birthday"
           type="date"
           required
+          max={today}
           value={value}
           onChange={(e) => setValue(e.target.value)}
           className="w-full rounded-2xl border px-5 py-4 text-lg outline-none transition-shadow focus:ring-2"
