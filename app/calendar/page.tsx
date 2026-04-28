@@ -3,15 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { format, addMonths, subMonths, addWeeks, subWeeks, addYears, subYears, startOfWeek, endOfWeek, getMonth, getYear } from "date-fns";
+import { format, addMonths, subMonths, addWeeks, subWeeks, startOfWeek, endOfWeek, getMonth, getYear } from "date-fns";
 import { BIRTHDAY_KEY } from "@/components/BirthdayForm";
 import MonthView from "@/components/calendar/MonthView";
 import WeekView from "@/components/calendar/WeekView";
-import YearView from "@/components/calendar/YearView";
 import type { DealWithOccurrences } from "@/lib/deals";
 import DayModal from "@/components/calendar/DayModal";
 
-export type CalendarView = "month" | "week" | "year";
+export type CalendarView = "month" | "week";
 
 export default function CalendarPage() {
   const router = useRouter();
@@ -69,15 +68,13 @@ export default function CalendarPage() {
   const title =
     view === "month"
       ? format(cursor, "MMMM yyyy")
-      : view === "week"
-      ? `${format(startOfWeek(cursor), "MMM d")} – ${format(endOfWeek(cursor), "MMM d, yyyy")}`
-      : format(cursor, "yyyy");
+      : `${format(startOfWeek(cursor), "MMM d")} – ${format(endOfWeek(cursor), "MMM d, yyyy")}`;
 
   function prev() {
-    setCursor((c) => view === "week" ? subWeeks(c, 1) : view === "year" ? subYears(c, 1) : subMonths(c, 1));
+    setCursor((c) => view === "week" ? subWeeks(c, 1) : subMonths(c, 1));
   }
   function next() {
-    setCursor((c) => view === "week" ? addWeeks(c, 1) : view === "year" ? addYears(c, 1) : addMonths(c, 1));
+    setCursor((c) => view === "week" ? addWeeks(c, 1) : addMonths(c, 1));
   }
 
   return (
@@ -87,28 +84,24 @@ export default function CalendarPage() {
         className="flex items-center justify-between px-5 py-4 border-b"
         style={{ borderColor: "var(--border)", background: "var(--card)" }}
       >
-        <span
-          className="text-xl font-bold tracking-tight"
-          style={{ color: "var(--color-terracotta)" }}
-        >
-          freebites
+        <span className="text-2xl font-black tracking-tighter leading-none">
+          <span style={{ color: "var(--color-terracotta)" }}>free</span>
+          <span style={{ color: "var(--color-forest)" }}>bites</span>
         </span>
 
         {/* view toggle */}
         <div
-          className="flex rounded-lg overflow-hidden border text-sm font-medium"
+          className="flex rounded-xl overflow-hidden border text-sm font-semibold"
           style={{ borderColor: "var(--border)" }}
         >
-          {(["month", "week", "year"] as CalendarView[]).map((v) => (
+          {(["month", "week"] as CalendarView[]).map((v) => (
             <button
               key={v}
               onClick={() => setView(v)}
-              className="px-3 py-1.5 capitalize transition-colors"
+              className="px-4 py-2 capitalize transition-colors"
               style={{
-                background:
-                  view === v ? "var(--color-terracotta)" : "var(--card)",
-                color:
-                  view === v ? "var(--color-cream)" : "var(--color-warm-gray)",
+                background: view === v ? "var(--color-terracotta)" : "var(--card)",
+                color: view === v ? "var(--color-cream)" : "var(--color-warm-gray)",
               }}
             >
               {v}
@@ -177,15 +170,6 @@ export default function CalendarPage() {
             dayMap={dayMap}
             loading={loadingDeals}
             onDayClick={setSelectedDay}
-          />
-        )}
-        {view === "year" && (
-          <YearView
-            cursor={cursor}
-            onMonthClick={(date) => {
-              setCursor(date);
-              setView("month");
-            }}
           />
         )}
       </div>
