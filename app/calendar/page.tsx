@@ -3,9 +3,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { format, addMonths, subMonths, getMonth, getYear } from "date-fns";
+import { format, addMonths, subMonths, addWeeks, subWeeks, startOfWeek, endOfWeek, getMonth, getYear } from "date-fns";
 import { BIRTHDAY_KEY } from "@/components/BirthdayForm";
 import MonthView from "@/components/calendar/MonthView";
+import WeekView from "@/components/calendar/WeekView";
 import type { DealWithOccurrences } from "@/lib/deals";
 import DayModal from "@/components/calendar/DayModal";
 
@@ -30,21 +31,37 @@ export default function CalendarPage() {
   }, [router]);
 
   const fetchDeals = useCallback(
-    async (date: Date, bday: string) => {
+    async (date: Date, bday: string, currentView: CalendarView) => {
       setLoadingDeals(true);
-      const y = getYear(date);
-      const m = getMonth(date) + 1;
-      const res = await fetch(`/api/deals?year=${y}&month=${m}&birthday=${bday}`);
-      const data = await res.json();
-      setDayMap(data);
+
+      const months: Array<{ y: number; m: number }> = [{ y: getYear(date), m: getMonth(date) + 1 }];
+
+      if (currentView === "week") {
+        const wStart = startOfWeek(date);
+        const wEnd = endOfWeek(date);
+        if (getMonth(wStart) !== getMonth(date)) {
+          months.unshift({ y: getYear(wStart), m: getMonth(wStart) + 1 });
+        }
+        if (getMonth(wEnd) !== getMonth(date)) {
+          months.push({ y: getYear(wEnd), m: getMonth(wEnd) + 1 });
+        }
+      }
+
+      const results = await Promise.all(
+        months.map(({ y, m }) =>
+          fetch(`/api/deals?year=${y}&month=${m}&birthday=${bday}`).then((r) => r.json()),
+        ),
+      );
+
+      setDayMap(Object.assign({}, ...results));
       setLoadingDeals(false);
     },
     [],
   );
 
   useEffect(() => {
-    if (birthday) fetchDeals(cursor, birthday);
-  }, [birthday, cursor, fetchDeals]);
+    if (birthday) fetchDeals(cursor, birthday, view);
+  }, [birthday, cursor, view, fetchDeals]);
 
   if (!birthday) return null;
 
@@ -52,14 +69,14 @@ export default function CalendarPage() {
     view === "month"
       ? format(cursor, "MMMM yyyy")
       : view === "week"
-      ? `Week of ${format(cursor, "MMM d, yyyy")}`
+      ? `${format(startOfWeek(cursor), "MMM d")} – ${format(endOfWeek(cursor), "MMM d, yyyy")}`
       : format(cursor, "yyyy");
 
   function prev() {
-    setCursor((c) => (view === "month" ? subMonths(c, 1) : subMonths(c, 1)));
+    setCursor((c) => view === "week" ? subWeeks(c, 1) : subMonths(c, 1));
   }
   function next() {
-    setCursor((c) => (view === "month" ? addMonths(c, 1) : addMonths(c, 1)));
+    setCursor((c) => view === "week" ? addWeeks(c, 1) : addMonths(c, 1));
   }
 
   return (
@@ -153,9 +170,13 @@ export default function CalendarPage() {
           />
         )}
         {view === "week" && (
-          <div className="flex items-center justify-center h-40" style={{ color: "var(--color-warm-gray)" }}>
-            Week view coming soon
-          </div>
+          <WeekView
+            cursor={cursor}
+            birthday={birthday}
+            dayMap={dayMap}
+            loading={loadingDeals}
+            onDayClick={setSelectedDay}
+          />
         )}
         {view === "year" && (
           <div className="flex items-center justify-center h-40" style={{ color: "var(--color-warm-gray)" }}>
