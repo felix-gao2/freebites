@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Restaurant {
+  id       String  @id @default(cuid())
+  name     String
+  chain    String?
+  address  String
+  lat      Float
+  lng      Float
+  hours    String?
+  website  String?
+  deals    Deal[]
+}
+
+model Deal {
+  id           String          @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant      @relation(fields: [restaurantId], references: [id])
+  title        String
+  description  String
+  terms        String?
+  dealType     DealType
+  occurrences  DealOccurrence[]
+}
+
+model DealOccurrence {
+  id              String   @id @default(cuid())
+  dealId          String
+  deal            Deal     @relation(fields: [dealId], references: [id])
+  date            DateTime?
+  recurrenceRule  String?
+  isBirthdayDeal  Boolean  @default(false)
+}
+
+model User {
+  id        String   @id
+  birthday  DateTime
+  createdAt DateTime @default(now())
+}
+
+enum DealType {
+  national_day
+  birthday
+  recurring
+  one_off
+}
