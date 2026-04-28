@@ -3,10 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { format, addMonths, subMonths, addWeeks, subWeeks, startOfWeek, endOfWeek, getMonth, getYear } from "date-fns";
+import { format, addMonths, subMonths, addWeeks, subWeeks, addYears, subYears, startOfWeek, endOfWeek, getMonth, getYear } from "date-fns";
 import { BIRTHDAY_KEY } from "@/components/BirthdayForm";
 import MonthView from "@/components/calendar/MonthView";
 import WeekView from "@/components/calendar/WeekView";
+import YearView from "@/components/calendar/YearView";
 import type { DealWithOccurrences } from "@/lib/deals";
 import DayModal from "@/components/calendar/DayModal";
 
@@ -73,10 +74,10 @@ export default function CalendarPage() {
       : format(cursor, "yyyy");
 
   function prev() {
-    setCursor((c) => view === "week" ? subWeeks(c, 1) : subMonths(c, 1));
+    setCursor((c) => view === "week" ? subWeeks(c, 1) : view === "year" ? subYears(c, 1) : subMonths(c, 1));
   }
   function next() {
-    setCursor((c) => view === "week" ? addWeeks(c, 1) : addMonths(c, 1));
+    setCursor((c) => view === "week" ? addWeeks(c, 1) : view === "year" ? addYears(c, 1) : addMonths(c, 1));
   }
 
   return (
@@ -179,9 +180,13 @@ export default function CalendarPage() {
           />
         )}
         {view === "year" && (
-          <div className="flex items-center justify-center h-40" style={{ color: "var(--color-warm-gray)" }}>
-            Year view coming soon
-          </div>
+          <YearView
+            cursor={cursor}
+            onMonthClick={(date) => {
+              setCursor(date);
+              setView("month");
+            }}
+          />
         )}
       </div>
 
