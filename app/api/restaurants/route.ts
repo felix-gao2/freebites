@@ -65,7 +65,13 @@ export async function GET() {
       lat: r.lat!,
       lng: r.lng!,
       website: r.website,
-      deals: r.deals,
+      deals: r.deals.map((d) => ({
+        ...d,
+        occurrences: d.occurrences.map((occ) => ({
+          ...occ,
+          date: occ.date?.toISOString() ?? null,
+        })),
+      })),
     }));
 
   return NextResponse.json(pins);
