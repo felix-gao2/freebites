@@ -177,14 +177,48 @@ function parseBirthday(raw: string): [number, number] {
   return [parseInt(p[1], 10), parseInt(p[2], 10)];
 }
 
+const DOW_MAP: Record<string, number> = {
+  sunday: 0, monday: 1, tuesday: 2, wednesday: 3,
+  thursday: 4, friday: 5, saturday: 6,
+};
+
+function firstWeekdayOfMonth(year: number, month: number, dow: number): number {
+  const d = new Date(year, month - 1, 1);
+  const diff = (dow - d.getDay() + 7) % 7;
+  return 1 + diff;
+}
+
 function isDealOnDate(
   deal: RestaurantPin["deals"][number],
-  _dateKey: string,
-  _bMonth: number,
-  _bDay: number,
+  dateKey: string,
+  bMonth: number,
+  bDay: number,
 ): boolean {
-  // For filter purposes: birthday deals → match birthday filter
-  // national_day / recurring → always show in today/week (simplified for MVP)
-  if (deal.dealType === "birthday") return false; // handled by "birthday" filter
-  return true;
+  const [year, month, day] = dateKey.split("-").map(Number);
+
+  return deal.occurrences.some((occ) => {
+    if (occ.isBirthdayDeal) {
+      return bMonth === month && bDay === day;
+    }
+    if (occ.recurrenceRule) {
+      const rule = occ.recurrenceRule;
+      if (rule.startsWith("weekly:")) {
+        const targetDow = DOW_MAP[rule.slice("weekly:".length).toLowerCase()];
+        if (targetDow === undefined) return false;
+        return new Date(year, month - 1, day).getDay() === targetDow;
+      }
+      if (rule.startsWith("yearly:")) {
+        const part = rule.slice("yearly:".length);
+        if (part === "june-first-friday") {
+          return month === 6 && day === firstWeekdayOfMonth(year, 6, 5);
+        }
+        const [mm, dd] = part.split("-").map(Number);
+        return month === mm && day === dd;
+      }
+    }
+    if (occ.date) {
+      return occ.date.startsWith(dateKey);
+    }
+    return false;
+  });
 }
