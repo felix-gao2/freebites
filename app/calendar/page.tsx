@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { format, addMonths, subMonths } from "date-fns";
+import { format, addMonths, subMonths, getMonth, getYear } from "date-fns";
 import { BIRTHDAY_KEY } from "@/components/BirthdayForm";
 import MonthView from "@/components/calendar/MonthView";
+import type { DealWithOccurrences } from "@/lib/deals";
 
 export type CalendarView = "month" | "week" | "year";
 
@@ -13,6 +14,8 @@ export default function CalendarPage() {
   const [birthday, setBirthday] = useState<string | null>(null);
   const [view, setView] = useState<CalendarView>("month");
   const [cursor, setCursor] = useState(new Date());
+  const [dayMap, setDayMap] = useState<Record<string, DealWithOccurrences[]>>({});
+  const [loadingDeals, setLoadingDeals] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem(BIRTHDAY_KEY);
@@ -22,6 +25,23 @@ export default function CalendarPage() {
     }
     setBirthday(saved);
   }, [router]);
+
+  const fetchDeals = useCallback(
+    async (date: Date, bday: string) => {
+      setLoadingDeals(true);
+      const y = getYear(date);
+      const m = getMonth(date) + 1;
+      const res = await fetch(`/api/deals?year=${y}&month=${m}&birthday=${bday}`);
+      const data = await res.json();
+      setDayMap(data);
+      setLoadingDeals(false);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (birthday) fetchDeals(cursor, birthday);
+  }, [birthday, cursor, fetchDeals]);
 
   if (!birthday) return null;
 
@@ -117,7 +137,12 @@ export default function CalendarPage() {
       {/* calendar body */}
       <div className="flex-1 p-4">
         {view === "month" && (
-          <MonthView cursor={cursor} birthday={birthday} />
+          <MonthView
+            cursor={cursor}
+            birthday={birthday}
+            dayMap={dayMap}
+            loading={loadingDeals}
+          />
         )}
         {view === "week" && (
           <div className="flex items-center justify-center h-40" style={{ color: "var(--color-warm-gray)" }}>

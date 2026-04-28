@@ -11,17 +11,23 @@ import {
   format,
   getMonth,
   getDate,
+  getYear,
 } from "date-fns";
+import type { DealWithOccurrences } from "@/lib/deals";
 
 const DAY_HEADERS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function MonthView({
   cursor,
   birthday,
+  dayMap = {},
+  loading = false,
   onDayClick,
 }: {
   cursor: Date;
   birthday: string;
+  dayMap?: Record<string, DealWithOccurrences[]>;
+  loading?: boolean;
   onDayClick?: (date: Date) => void;
 }) {
   const [bMonth, bDay] = parseBirthday(birthday);
@@ -31,7 +37,7 @@ export default function MonthView({
   const days = eachDayOfInterval({ start: gridStart, end: gridEnd });
 
   return (
-    <div className="w-full">
+    <div className="w-full" style={{ opacity: loading ? 0.5 : 1, transition: "opacity 0.2s" }}>
       {/* day-of-week headers */}
       <div className="grid grid-cols-7 mb-1">
         {DAY_HEADERS.map((d) => (
@@ -55,6 +61,9 @@ export default function MonthView({
             getMonth(day) + 1 === bMonth &&
             getDate(day) === bDay;
 
+          const key = `${getYear(day)}-${String(getMonth(day) + 1).padStart(2, "0")}-${String(getDate(day)).padStart(2, "0")}`;
+          const deals = dayMap[key] ?? [];
+
           return (
             <DayCell
               key={day.toISOString()}
@@ -62,6 +71,7 @@ export default function MonthView({
               inMonth={inMonth}
               today={today}
               isBirthday={isBirthday}
+              deals={deals}
               onClick={() => onDayClick?.(day)}
             />
           );
@@ -71,17 +81,26 @@ export default function MonthView({
   );
 }
 
+const DEAL_CHIP_COLORS: Record<string, string> = {
+  birthday:     "#C1613A",
+  national_day: "#4A7C6B",
+  recurring:    "#7A6960",
+  one_off:      "#9E4D2C",
+};
+
 function DayCell({
   day,
   inMonth,
   today,
   isBirthday,
+  deals,
   onClick,
 }: {
   day: Date;
   inMonth: boolean;
   today: boolean;
   isBirthday: boolean;
+  deals: DealWithOccurrences[];
   onClick: () => void;
 }) {
   const label = format(day, "d");
@@ -119,8 +138,32 @@ function DayCell({
       {/* birthday badge */}
       {isBirthday && (
         <span className="mt-0.5 text-[10px] leading-none" style={{ color: "var(--color-terracotta)" }}>
-          🎂 your birthday
+          🎂 birthday
         </span>
+      )}
+
+      {/* deal chips — max 3, then +N */}
+      {inMonth && deals.length > 0 && (
+        <div className="mt-1 flex flex-wrap gap-0.5">
+          {deals.slice(0, 3).map((deal) => (
+            <span
+              key={deal.id}
+              className="inline-block rounded-full px-1.5 py-px text-[9px] font-semibold leading-none text-white truncate max-w-[70px]"
+              style={{ background: DEAL_CHIP_COLORS[deal.dealType] ?? "#7A6960" }}
+              title={deal.title}
+            >
+              {deal.restaurant.name.split(" ")[0]}
+            </span>
+          ))}
+          {deals.length > 3 && (
+            <span
+              className="inline-block rounded-full px-1.5 py-px text-[9px] font-semibold leading-none"
+              style={{ background: "var(--muted)", color: "var(--color-warm-gray)" }}
+            >
+              +{deals.length - 3}
+            </span>
+          )}
+        </div>
       )}
     </button>
   );
