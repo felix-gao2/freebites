@@ -33,6 +33,40 @@ export default function LandingHero() {
       className="relative min-h-screen overflow-hidden flex items-center justify-center px-6 py-16"
       style={{ background: "var(--color-cream)" }}
     >
+      {/* gradient orbs */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div
+          className="absolute rounded-full"
+          style={{
+            width: 520, height: 520,
+            background: "radial-gradient(circle, rgba(193,97,58,0.22) 0%, transparent 70%)",
+            filter: "blur(48px)",
+            top: -130, left: -160,
+            animation: "fb-orb-a 28s ease-in-out infinite",
+          }}
+        />
+        <div
+          className="absolute rounded-full"
+          style={{
+            width: 460, height: 460,
+            background: "radial-gradient(circle, rgba(44,74,62,0.18) 0%, transparent 70%)",
+            filter: "blur(52px)",
+            bottom: -100, right: -120,
+            animation: "fb-orb-b 34s ease-in-out infinite",
+          }}
+        />
+        <div
+          className="absolute rounded-full"
+          style={{
+            width: 360, height: 360,
+            background: "radial-gradient(circle, rgba(217,132,95,0.18) 0%, transparent 70%)",
+            filter: "blur(44px)",
+            top: "35%", right: -60,
+            animation: "fb-orb-c 22s ease-in-out infinite",
+          }}
+        />
+      </div>
+
       {/* floating background particles */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {FLOATERS.map((f, i) => (
