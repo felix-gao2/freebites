@@ -98,6 +98,21 @@
   }
 }
 
+@keyframes fb-orb-a {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  33%       { transform: translate(50px, -60px) scale(1.08); }
+  66%       { transform: translate(-30px, 40px) scale(0.95); }
+}
+@keyframes fb-orb-b {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  40%       { transform: translate(-70px, 50px) scale(1.1); }
+  75%       { transform: translate(40px, -30px) scale(0.92); }
+}
+@keyframes fb-orb-c {
+  0%, 100% { transform: translate(0px, 0px); }
+  50%       { transform: translate(60px, 70px); }
+}
+
 @keyframes fb-float {
   0%   { transform: translateY(0) rotate(0deg);   opacity: 0.18; }
   10%  { opacity: 0.18; }
