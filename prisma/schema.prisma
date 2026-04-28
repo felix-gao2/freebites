@@ -8,26 +8,34 @@ datasource db {
 }
 
 model Restaurant {
-  id       String  @id @default(cuid())
-  name     String
-  chain    String?
-  address  String
-  lat      Float
-  lng      Float
-  hours    String?
-  website  String?
-  deals    Deal[]
+  id           String  @id @default(cuid())
+  name         String
+  chain        String?
+  address      String?
+  lat          Float?
+  lng          Float?
+  hours        String?
+  website      String?
+  gtaLocations Boolean @default(true)
+  deals        Deal[]
 }
 
 model Deal {
-  id           String          @id @default(cuid())
-  restaurantId String
-  restaurant   Restaurant      @relation(fields: [restaurantId], references: [id])
-  title        String
-  description  String
-  terms        String?
-  dealType     DealType
-  occurrences  DealOccurrence[]
+  id             String          @id @default(cuid())
+  restaurantId   String
+  restaurant     Restaurant      @relation(fields: [restaurantId], references: [id])
+  title          String
+  description    String
+  terms          String?
+  dealType       DealType
+  tier           Int             @default(1)
+  signupRequired Boolean         @default(false)
+  signupMethod   String?
+  validityWindow String?
+  sourceUrl      String?
+  lastVerified   DateTime?
+  active         Boolean         @default(true)
+  occurrences    DealOccurrence[]
 }
 
 model DealOccurrence {
