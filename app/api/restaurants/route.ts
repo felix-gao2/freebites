@@ -17,6 +17,11 @@ export type RestaurantPin = {
     signupRequired: boolean;
     signupMethod: string | null;
     validityWindow: string | null;
+    occurrences: {
+      isBirthdayDeal: boolean;
+      recurrenceRule: string | null;
+      date: string | null;
+    }[];
   }[];
 };
 
@@ -40,6 +45,13 @@ export async function GET() {
           signupRequired: true,
           signupMethod: true,
           validityWindow: true,
+          occurrences: {
+            select: {
+              isBirthdayDeal: true,
+              recurrenceRule: true,
+              date: true,
+            },
+          },
         },
       },
     },
