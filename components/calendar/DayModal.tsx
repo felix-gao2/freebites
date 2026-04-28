@@ -69,9 +69,15 @@ export default function DayModal({
         {/* deal list */}
         <div className="overflow-y-auto flex-1 px-4 py-3 flex flex-col gap-3">
           {deals.length === 0 ? (
-            <p className="text-sm text-center py-8" style={{ color: "var(--color-warm-gray)" }}>
-              No deals this day.
-            </p>
+            <div className="flex flex-col items-center justify-center py-10 gap-2">
+              <span className="text-4xl">🍽️</span>
+              <p className="text-sm font-medium" style={{ color: "var(--color-warm-gray)" }}>
+                No deals on this day
+              </p>
+              <p className="text-xs text-center px-4" style={{ color: "var(--color-warm-gray)" }}>
+                Try a nearby day or check the map for what&apos;s available
+              </p>
+            </div>
           ) : (
             deals.map((deal) => <DealCard key={deal.id} deal={deal} />)
           )}
