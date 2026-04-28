@@ -91,3 +91,15 @@
     @apply font-sans;
   }
 }
+
+@keyframes fb-float {
+  0%   { transform: translateY(0) rotate(0deg);   opacity: 0.18; }
+  10%  { opacity: 0.18; }
+  90%  { opacity: 0.12; }
+  100% { transform: translateY(-115vh) rotate(18deg); opacity: 0; }
+}
+
+@keyframes fb-bob {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
