@@ -36,8 +36,10 @@ export default function MonthView({
   const gridEnd = endOfWeek(endOfMonth(cursor));
   const days = eachDayOfInterval({ start: gridStart, end: gridEnd });
 
+  const isFirstLoad = loading && Object.keys(dayMap).length === 0;
+
   return (
-    <div className="w-full" style={{ opacity: loading ? 0.5 : 1, transition: "opacity 0.2s" }}>
+    <div className="w-full" style={{ opacity: !isFirstLoad && loading ? 0.5 : 1, transition: "opacity 0.2s" }}>
       {/* day-of-week headers */}
       <div className="grid grid-cols-7 mb-1">
         {DAY_HEADERS.map((d) => (
@@ -72,6 +74,7 @@ export default function MonthView({
               today={today}
               isBirthday={isBirthday}
               deals={deals}
+              skeleton={isFirstLoad && inMonth}
               onClick={() => onDayClick?.(day)}
             />
           );
@@ -94,6 +97,7 @@ function DayCell({
   today,
   isBirthday,
   deals,
+  skeleton,
   onClick,
 }: {
   day: Date;
@@ -101,18 +105,19 @@ function DayCell({
   today: boolean;
   isBirthday: boolean;
   deals: DealWithOccurrences[];
+  skeleton?: boolean;
   onClick: () => void;
 }) {
   const label = format(day, "d");
 
   let bg = "var(--card)";
-  if (isBirthday) bg = "oklch(0.97 0.05 50)"; // warm yellow tint
+  if (isBirthday) bg = "oklch(0.97 0.05 50)";
   if (!inMonth) bg = "var(--muted)";
 
   return (
     <button
       onClick={onClick}
-      className="relative flex flex-col items-start p-1.5 min-h-[72px] text-left transition-colors hover:brightness-95 focus:outline-none"
+      className="relative flex flex-col items-start p-1.5 min-h-[52px] sm:min-h-[72px] text-left transition-colors hover:brightness-95 focus:outline-none"
       style={{ background: bg }}
     >
       {/* date number */}
@@ -135,16 +140,36 @@ function DayCell({
         {label}
       </span>
 
+      {/* skeleton shimmer */}
+      {inMonth && skeleton && (
+        <div className="mt-1 w-full flex flex-col gap-0.5">
+          <div className="h-2 rounded-full animate-pulse" style={{ background: "var(--muted)", width: "65%" }} />
+        </div>
+      )}
+
       {/* birthday badge */}
-      {isBirthday && (
+      {!skeleton && isBirthday && (
         <span className="mt-0.5 text-[10px] leading-none" style={{ color: "var(--color-terracotta)" }}>
           🎂 birthday
         </span>
       )}
 
-      {/* deal chips — max 3, then +N */}
-      {inMonth && deals.length > 0 && (
-        <div className="mt-1 flex flex-wrap gap-0.5">
+      {/* mobile: colored dots */}
+      {!skeleton && inMonth && deals.length > 0 && (
+        <div className="mt-0.5 flex gap-0.5 sm:hidden">
+          {deals.slice(0, 4).map((deal) => (
+            <div
+              key={deal.id}
+              className="w-1.5 h-1.5 rounded-full shrink-0"
+              style={{ background: DEAL_CHIP_COLORS[deal.dealType] ?? "#7A6960" }}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* desktop: name chips */}
+      {!skeleton && inMonth && deals.length > 0 && (
+        <div className="mt-1 hidden sm:flex flex-wrap gap-0.5">
           {deals.slice(0, 3).map((deal) => (
             <span
               key={deal.id}
