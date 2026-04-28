@@ -6,6 +6,7 @@ import { format, addMonths, subMonths, getMonth, getYear } from "date-fns";
 import { BIRTHDAY_KEY } from "@/components/BirthdayForm";
 import MonthView from "@/components/calendar/MonthView";
 import type { DealWithOccurrences } from "@/lib/deals";
+import DayModal from "@/components/calendar/DayModal";
 
 export type CalendarView = "month" | "week" | "year";
 
@@ -16,6 +17,7 @@ export default function CalendarPage() {
   const [cursor, setCursor] = useState(new Date());
   const [dayMap, setDayMap] = useState<Record<string, DealWithOccurrences[]>>({});
   const [loadingDeals, setLoadingDeals] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem(BIRTHDAY_KEY);
@@ -142,6 +144,7 @@ export default function CalendarPage() {
             birthday={birthday}
             dayMap={dayMap}
             loading={loadingDeals}
+            onDayClick={setSelectedDay}
           />
         )}
         {view === "week" && (
@@ -155,6 +158,21 @@ export default function CalendarPage() {
           </div>
         )}
       </div>
+
+      {/* day detail modal */}
+      {selectedDay && (
+        <DayModal
+          date={selectedDay}
+          deals={(() => {
+            const y = getYear(selectedDay);
+            const m = getMonth(selectedDay) + 1;
+            const d = selectedDay.getDate();
+            const key = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+            return dayMap[key] ?? [];
+          })()}
+          onClose={() => setSelectedDay(null)}
+        />
+      )}
     </div>
   );
 }
