@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { format, addMonths, subMonths, getMonth, getYear } from "date-fns";
 import { BIRTHDAY_KEY } from "@/components/BirthdayForm";
 import MonthView from "@/components/calendar/MonthView";
@@ -97,17 +98,21 @@ export default function CalendarPage() {
           ))}
         </div>
 
-        {/* clear birthday */}
-        <button
-          className="text-xs underline"
-          style={{ color: "var(--color-warm-gray)" }}
-          onClick={() => {
-            localStorage.removeItem(BIRTHDAY_KEY);
-            router.push("/");
-          }}
-        >
-          change birthday
-        </button>
+        <div className="flex items-center gap-3">
+          <Link href="/map" className="text-sm font-medium" style={{ color: "var(--color-forest)" }}>
+            Map
+          </Link>
+          <button
+            className="text-xs underline"
+            style={{ color: "var(--color-warm-gray)" }}
+            onClick={() => {
+              localStorage.removeItem(BIRTHDAY_KEY);
+              router.push("/");
+            }}
+          >
+            change birthday
+          </button>
+        </div>
       </header>
 
       {/* month navigator */}
