@@ -23,6 +23,7 @@ export default function BirthdayForm({ onDatePick }: BirthdayFormProps) {
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   const [arrowHover, setArrowHover] = useState(false);
+  const [triggerFocused, setTriggerFocused] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
@@ -99,22 +100,29 @@ export default function BirthdayForm({ onDatePick }: BirthdayFormProps) {
           </label>
 
           {/* Trigger button styled as an input */}
-          <button
+          <motion.button
             ref={triggerRef}
             type="button"
             onClick={handleToggle}
-            className="w-full rounded-2xl border px-5 py-4 text-lg font-normal text-left outline-none transition-all"
+            onFocus={() => setTriggerFocused(true)}
+            onBlur={() => setTriggerFocused(false)}
+            whileTap={{ scale: 0.99 }}
+            transition={{ duration: 0.15, ease: OUT }}
+            className="w-full rounded-2xl border px-5 py-4 text-lg font-normal text-left outline-none"
             style={{
-              borderColor: pickerOpen ? "var(--color-terracotta)" : "var(--border)",
+              borderColor: pickerOpen || triggerFocused ? "var(--color-terracotta)" : "var(--border)",
               background: "linear-gradient(180deg, #ffffff 0%, rgba(255,247,242,0.65) 100%)",
               color: selectedDate ? "var(--foreground)" : "rgba(122,105,96,0.65)",
               boxShadow: pickerOpen
                 ? "0 0 0 3px rgba(193,97,58,0.14), inset 0 1px 3px rgba(0,0,0,0.04)"
+                : triggerFocused
+                ? "0 0 0 3px rgba(193,97,58,0.12)"
                 : "inset 0 1px 3px rgba(0,0,0,0.04)",
+              transition: "border-color 150ms ease, box-shadow 150ms ease",
             }}
           >
             {selectedDate ? format(selectedDate, "MMMM d, yyyy") : "Enter your birthday"}
-          </button>
+          </motion.button>
         </div>
 
         {/* Submit button */}
@@ -128,7 +136,7 @@ export default function BirthdayForm({ onDatePick }: BirthdayFormProps) {
             boxShadow: "0 8px 28px rgba(193,97,58,0.38), 0 2px 8px rgba(0,0,0,0.08)",
           } : {}}
           whileTap={selectedDate ? { scale: 0.98 } : {}}
-          transition={{ duration: 0.2, ease: OUT }}
+          transition={{ duration: 0.15, ease: OUT }}
           className="w-full rounded-2xl px-5 py-4 text-lg font-bold flex items-center justify-center gap-1.5"
           style={{
             background: selectedDate ? "var(--color-terracotta)" : "rgba(193,97,58,0.38)",
@@ -140,7 +148,7 @@ export default function BirthdayForm({ onDatePick }: BirthdayFormProps) {
           <span>Show me the free food</span>
           <motion.span
             animate={{ x: arrowHover && selectedDate ? 4 : 0 }}
-            transition={{ duration: 0.2, ease: OUT }}
+            transition={{ duration: 0.15, ease: OUT }}
           >
             →
           </motion.span>

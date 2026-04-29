@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "react-day-picker/style.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -113,14 +114,44 @@
   50%       { transform: translate(60px, 70px); }
 }
 
-@keyframes fb-float {
-  0%   { transform: translateY(0) rotate(0deg);   opacity: 0.18; }
-  10%  { opacity: 0.18; }
-  90%  { opacity: 0.12; }
-  100% { transform: translateY(-115vh) rotate(18deg); opacity: 0; }
-}
-
 @keyframes fb-bob {
   0%, 100% { transform: translateY(0px); }
   50%       { transform: translateY(-10px); }
 }
+
+/* ── react-day-picker palette ─────────────────────────────────── */
+/* Selected day: filled terracotta instead of default border-only */
+.rdp-selected .rdp-day_button {
+  background-color: var(--color-terracotta);
+  color: var(--color-cream);
+  border-color: transparent;
+}
+.rdp-selected .rdp-day_button:hover {
+  background-color: var(--color-terracotta-dark);
+}
+/* Today: terracotta text, bold */
+.rdp-today:not(.rdp-outside) .rdp-day_button {
+  color: var(--color-terracotta);
+  font-weight: 700;
+}
+/* Hover on non-selected days */
+.rdp-day:not(.rdp-selected) .rdp-day_button:not([disabled]):hover {
+  background-color: var(--color-cream-dark);
+}
+/* Crisp transitions on day cells */
+.rdp-day_button { transition: background-color 120ms ease, color 120ms ease; }
+/* Caption label (month/year text) */
+.rdp-caption_label {
+  color: var(--color-forest);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+/* Chevron arrows */
+.rdp-chevron { fill: var(--color-forest); }
+/* Nav prev/next hover */
+.rdp-button_previous,
+.rdp-button_next { border-radius: 8px; transition: background-color 150ms; }
+.rdp-button_previous:hover,
+.rdp-button_next:hover { background-color: var(--color-cream-dark); }
+/* Weekday headers */
+.rdp-weekday { color: var(--color-warm-gray); }
