@@ -133,14 +133,14 @@ export default function LandingHero() {
       </motion.div>
 
       {/* main card */}
-      <div className="relative z-10 w-full max-w-sm flex flex-col items-center gap-10 text-center">
+      <div className="relative z-10 w-full max-w-sm flex flex-col items-center gap-16 text-center">
 
         {/* logo group — same flex layout as before, but logo+h1 and tagline animate separately */}
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-6">
 
           {/* logo emoji + h1: scale up from 0.95, fade in */}
           <motion.div
-            className="flex flex-col items-center gap-4"
+            className="flex flex-col items-center gap-3"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.55, ease: OUT }}
