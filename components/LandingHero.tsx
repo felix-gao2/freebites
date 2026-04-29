@@ -190,7 +190,7 @@ export default function LandingHero() {
 
         {/* caption: fades in last */}
         <motion.p
-          className="text-sm"
+          className="text-sm font-light"
           style={{ color: "var(--color-warm-gray)" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.6 }}
