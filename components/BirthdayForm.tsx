@@ -95,7 +95,7 @@ export default function BirthdayForm({ onDatePick }: BirthdayFormProps) {
         {/* Date picker field */}
         <div ref={containerRef} className="flex flex-col gap-2 text-left">
           <label className="text-base font-semibold" style={{ color: "var(--color-forest)" }}>
-            When&apos;s your birthday?
+            When&apos;s your <em style={{ fontFamily: "var(--font-lora, Georgia, serif)", fontStyle: "italic", fontWeight: "normal" }}>birthday</em>?
           </label>
 
           {/* Trigger button styled as an input */}

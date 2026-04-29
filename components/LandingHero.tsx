@@ -171,7 +171,7 @@ export default function LandingHero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: OUT, delay: 0.15 }}
           >
-            <em style={{ fontStyle: "italic", color: "var(--color-terracotta)", opacity: 0.85 }}>Free</em>{" "}
+            <em style={{ fontFamily: "var(--font-lora, Georgia, serif)", fontStyle: "italic", color: "var(--color-terracotta)", opacity: 0.9 }}>Free</em>{" "}
             food across the GTA — <br />
             birthdays, food days &amp; more.
           </motion.p>
@@ -196,7 +196,7 @@ export default function LandingHero() {
           animate={{ opacity: 0.6 }}
           transition={{ duration: 0.45, ease: "easeOut", delay: 0.44 }}
         >
-          Stored locally · no account needed
+          Stored <em style={{ fontFamily: "var(--font-lora, Georgia, serif)", fontStyle: "italic" }}>locally</em> · no account needed
         </motion.p>
 
       </div>

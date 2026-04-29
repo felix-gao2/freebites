@@ -1,5 +1,13 @@
 import type { Metadata } from "next";
+import { Lora } from "next/font/google";
 import "./globals.css";
+
+const lora = Lora({
+  subsets: ["latin"],
+  style: ["italic"],
+  variable: "--font-lora",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "freebites — free food in the GTA",
@@ -12,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className={`h-full ${lora.variable}`}>
       <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--foreground)] antialiased">
         {children}
       </body>
