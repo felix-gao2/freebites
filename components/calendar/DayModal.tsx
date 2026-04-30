@@ -145,9 +145,7 @@ export default function DayModal({
               </h2>
               {deals.length > 0 && (
                 <span className="text-sm" style={{ color: "var(--color-warm-gray)" }}>
-                  {filtersActive
-                    ? `${filtered.length} of ${deals.length}`
-                    : `${deals.length} deal${deals.length !== 1 ? "s" : ""}`}
+                  {filtered.length} deal{filtered.length !== 1 ? "s" : ""}
                 </span>
               )}
             </div>
