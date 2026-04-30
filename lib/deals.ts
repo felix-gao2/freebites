@@ -1,5 +1,13 @@
 import { startOfMonth, endOfMonth, eachDayOfInterval, getDay, getMonth, getDate, getYear } from "date-fns";
 import type { DealType } from "@/lib/generated/prisma/enums";
+import type { ValidityWindow } from "@/lib/computeValidityRange";
+
+export function parseValidityWindow(w: unknown): ValidityWindow | null {
+  if (!w || typeof w !== "object" || Array.isArray(w)) return null;
+  const obj = w as Record<string, unknown>;
+  if (typeof obj.type !== "string") return null;
+  return obj as unknown as ValidityWindow;
+}
 
 export type DealWithOccurrences = {
   id: string;
@@ -10,7 +18,7 @@ export type DealWithOccurrences = {
   tier: number;
   signupRequired: boolean;
   signupMethod: string | null;
-  validityWindow: string | null;
+  validityWindow: unknown;
   sourceUrl: string | null;
   lastVerified: Date | null;
   active: boolean;

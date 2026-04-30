@@ -78,11 +78,6 @@ export default function PinPopup({
                 >
                   {TIER_LABEL[deal.tier] ?? "Deal"}
                 </span>
-                {deal.validityWindow && (
-                  <span className="text-[10px]" style={{ color: "var(--color-warm-gray)" }}>
-                    {deal.validityWindow}
-                  </span>
-                )}
               </div>
 
               <p className="text-sm font-medium leading-snug" style={{ color: "var(--color-forest)" }}>

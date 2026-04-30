@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { buildDayMap } from "@/lib/deals";
+import { buildDayMap, type DealWithOccurrences } from "@/lib/deals";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -14,12 +14,12 @@ export async function GET(req: NextRequest) {
       restaurant: { select: { id: true, name: true, website: true } },
       occurrences: { select: { isBirthdayDeal: true, recurrenceRule: true, date: true } },
     },
-  });
+  }) as unknown as DealWithOccurrences[];
 
   const dayMap = buildDayMap(deals, year, month, birthday);
 
   // Convert Map to plain object for JSON response
-  const result: Record<string, typeof deals> = {};
+  const result: Record<string, DealWithOccurrences[]> = {};
   for (const [key, val] of dayMap) {
     result[key] = val;
   }

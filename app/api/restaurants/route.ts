@@ -16,7 +16,7 @@ export type RestaurantPin = {
     tier: number;
     signupRequired: boolean;
     signupMethod: string | null;
-    validityWindow: string | null;
+    validityWindow: unknown;
     occurrences: {
       isBirthdayDeal: boolean;
       recurrenceRule: string | null;
