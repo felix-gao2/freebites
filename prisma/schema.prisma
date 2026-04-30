@@ -32,6 +32,7 @@ model Deal {
   tier           Int             @default(1)
   signupRequired Boolean         @default(false)
   signupMethod   String?
+  signupType     SignupType      @default(no_signup)
   validityWindow Json?
   marquee        Boolean         @default(false)
   sourceUrl      String?
@@ -60,6 +61,15 @@ enum DealType {
   birthday
   recurring
   one_off
+}
+
+enum SignupType {
+  no_signup
+  show_id
+  app
+  rewards
+  newsletter
+  loyalty
 }
 
 enum RestaurantCategory {

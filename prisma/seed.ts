@@ -3,8 +3,19 @@ config();
 
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../lib/generated/prisma/client";
+import { PrismaClient, SignupType } from "../lib/generated/prisma/client";
 import type { ValidityWindow } from "../lib/computeValidityRange";
+
+function deriveSignupType(signupRequired: boolean, signupMethod: string | null): SignupType {
+  const m = (signupMethod ?? "").toLowerCase();
+  if (m.includes("show id") || m.includes("show photo id")) return SignupType.show_id;
+  if (!signupRequired) return SignupType.no_signup;
+  if (m.includes("app")) return SignupType.app;
+  if (m.includes("rewards")) return SignupType.rewards;
+  if (m.includes("newsletter") || m.includes("email")) return SignupType.newsletter;
+  if (m.includes("loyalty")) return SignupType.loyalty;
+  return SignupType.no_signup;
+}
 
 let prisma: PrismaClient;
 
@@ -1129,6 +1140,7 @@ async function main() {
         marquee: d.marquee ?? false,
         signupRequired: d.signupRequired,
         signupMethod: d.signupMethod,
+        signupType: deriveSignupType(d.signupRequired, d.signupMethod),
         validityWindow: d.validityWindow ?? undefined,
         sourceUrl: d.sourceUrl,
         lastVerified: TODAY,
