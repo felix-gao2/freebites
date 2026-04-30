@@ -15,6 +15,15 @@ const TIER_LABEL: Record<number, string> = {
   3: "Deal",
 };
 
+const SIGNUP_TYPE_LABEL: Record<string, string> = {
+  no_signup:   "No signup",
+  show_id:     "Show ID",
+  app:         "App needed",
+  rewards:     "Rewards member",
+  newsletter:  "Newsletter",
+  loyalty:     "Loyalty program",
+};
+
 const TYPE_EMOJI: Record<string, string> = {
   birthday:     "🎂",
   national_day: "📅",
@@ -326,7 +335,7 @@ function DealCard({ deal }: { deal: DealWithOccurrences }) {
       className="rounded-xl border p-4 flex flex-col gap-1.5"
       style={{ borderColor: "var(--border)", background: "var(--background)" }}
     >
-      {/* type + tier row */}
+      {/* type + tier + signup row */}
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-base">{TYPE_EMOJI[deal.dealType] ?? "🍔"}</span>
         <span
@@ -338,14 +347,12 @@ function DealCard({ deal }: { deal: DealWithOccurrences }) {
         >
           {TIER_LABEL[deal.tier] ?? "Deal"}
         </span>
-        {deal.signupRequired && (
-          <span
-            className="text-[10px] uppercase tracking-wide rounded-full px-2 py-0.5"
-            style={{ background: "var(--muted)", color: "var(--color-warm-gray)" }}
-          >
-            {deal.signupMethod ?? "Signup req."}
-          </span>
-        )}
+        <span
+          className="text-[10px] font-medium rounded-full px-2 py-0.5"
+          style={{ background: "var(--muted)", color: "var(--color-warm-gray)" }}
+        >
+          {SIGNUP_TYPE_LABEL[deal.signupType] ?? deal.signupType}
+        </span>
       </div>
 
       {/* restaurant */}
@@ -365,7 +372,7 @@ function DealCard({ deal }: { deal: DealWithOccurrences }) {
 
       {/* terms */}
       {deal.terms && (
-        <p className="text-[11px] italic leading-relaxed" style={{ color: "var(--color-warm-gray)" }}>
+        <p className="text-[10px] italic leading-relaxed opacity-60" style={{ color: "var(--color-warm-gray)" }}>
           {deal.terms}
         </p>
       )}
