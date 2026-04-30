@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import type { DealWithOccurrences } from "@/lib/deals";
@@ -58,19 +58,6 @@ export default function DayModal({
   const [tier, setTier]         = useState<TierFilter>("all");
   const [signup, setSignup]     = useState<SignupFilter>("all");
   const [category, setCategory] = useState<CategoryFilter>("all");
-  const [catOpen, setCatOpen]   = useState(false);
-  const dropdownRef             = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!catOpen) return;
-    function onMouseDown(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setCatOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", onMouseDown);
-    return () => document.removeEventListener("mousedown", onMouseDown);
-  }, [catOpen]);
 
   // Deals after tier + signup filters (used to compute category counts)
   const tierSignupFiltered = useMemo(() => deals.filter((d) => {
@@ -79,14 +66,6 @@ export default function DayModal({
     if (signup === "no_prep" && d.signupType !== "no_signup" && d.signupType !== "show_id") return false;
     return true;
   }), [deals, tier, signup]);
-
-  const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const d of tierSignupFiltered) {
-      counts[d.restaurant.category] = (counts[d.restaurant.category] ?? 0) + 1;
-    }
-    return counts;
-  }, [tierSignupFiltered]);
 
   const filtered = useMemo(() => {
     if (category === "all") return tierSignupFiltered;
@@ -173,55 +152,19 @@ export default function DayModal({
           <Sep />
 
           {/* Signup */}
-          <Chip label="All"            active={signup === "all"}     onClick={() => setSignup("all")} />
-          <Chip label="No prep needed" active={signup === "no_prep"} onClick={() => setSignup("no_prep")} />
+          <Chip label="No prep needed" active={signup === "no_prep"} onClick={() => setSignup(signup === "no_prep" ? "all" : "no_prep")} />
 
           <Sep />
 
-          {/* Category dropdown */}
-          <div className="relative shrink-0" ref={dropdownRef}>
-            <button
-              onClick={() => setCatOpen((o) => !o)}
-              className="flex items-center gap-1.5 text-xs font-medium rounded-full px-3 py-1 border transition-colors whitespace-nowrap"
-              style={{
-                borderColor: category !== "all" ? "var(--color-terracotta)" : "var(--border)",
-                background:  category !== "all" ? "var(--color-terracotta)" : "transparent",
-                color:       category !== "all" ? "var(--color-cream)"      : "var(--color-warm-gray)",
-              }}
-            >
-              {category === "all" ? "All categories" : CATEGORY_LABELS[category]}
-              <span style={{ fontSize: 9, opacity: 0.7 }}>{catOpen ? "▲" : "▼"}</span>
-            </button>
-
-            <AnimatePresence>
-              {catOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 4 }}
-                  transition={{ duration: 0.12 }}
-                  className="absolute bottom-full mb-2 left-0 rounded-xl border shadow-lg z-10 py-1 min-w-[190px]"
-                  style={{ background: "var(--card)", borderColor: "var(--border)" }}
-                >
-                  <DropdownItem
-                    label="All categories"
-                    active={category === "all"}
-                    count={tierSignupFiltered.length}
-                    onClick={() => { setCategory("all"); setCatOpen(false); }}
-                  />
-                  {ALL_CATEGORIES.filter((cat) => (categoryCounts[cat] ?? 0) > 0).map((cat) => (
-                    <DropdownItem
-                      key={cat}
-                      label={CATEGORY_LABELS[cat]}
-                      active={category === cat}
-                      count={categoryCounts[cat] ?? 0}
-                      onClick={() => { setCategory(cat); setCatOpen(false); }}
-                    />
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          {/* Category */}
+          {ALL_CATEGORIES.map((cat) => (
+            <Chip
+              key={cat}
+              label={CATEGORY_LABELS[cat]}
+              active={category === cat}
+              onClick={() => setCategory(category === cat ? "all" : cat)}
+            />
+          ))}
         </div>
 
         {/* deal list */}
@@ -294,32 +237,6 @@ function Sep() {
       className="shrink-0 h-4 w-px mx-0.5"
       style={{ background: "var(--border)" }}
     />
-  );
-}
-
-function DropdownItem({
-  label,
-  active,
-  count,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  count: number;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="w-full flex items-center justify-between px-3 py-1.5 text-xs text-left transition-opacity hover:opacity-70"
-      style={{
-        color:      active ? "var(--color-terracotta)" : "var(--color-forest)",
-        fontWeight: active ? 600 : 400,
-      }}
-    >
-      <span>{label}</span>
-      <span className="ml-4 tabular-nums" style={{ color: "var(--color-warm-gray)" }}>{count}</span>
-    </button>
   );
 }
 
