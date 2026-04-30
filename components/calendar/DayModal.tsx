@@ -35,6 +35,8 @@ const ALL_CATEGORIES: CategoryFilter[] = [
   "coffee_drinks", "bakeries_sweets", "fast_food", "sit_down", "ice_cream", "convenience",
 ];
 
+const SIGNUP_ORDER = ["no_signup", "show_id", "app", "rewards", "newsletter", "loyalty"];
+
 export default function DayModal({
   date,
   deals,
@@ -83,6 +85,19 @@ export default function DayModal({
     if (category === "all") return tierSignupFiltered;
     return tierSignupFiltered.filter((d) => d.restaurant.category === category);
   }, [tierSignupFiltered, category]);
+
+  // Groups: one entry per non-empty category, deals sorted by signup difficulty
+  const groups = useMemo(() => {
+    const visibleCats = category === "all" ? ALL_CATEGORIES : [category];
+    return visibleCats
+      .map((cat) => ({
+        cat,
+        deals: filtered
+          .filter((d) => d.restaurant.category === cat)
+          .sort((a, b) => SIGNUP_ORDER.indexOf(a.signupType) - SIGNUP_ORDER.indexOf(b.signupType)),
+      }))
+      .filter((g) => g.deals.length > 0);
+  }, [filtered, category]);
 
   const filterKey = `${tier}-${signup}-${category}`;
   const filtersActive = tier !== "all" || signup !== "all" || category !== "all";
@@ -215,9 +230,9 @@ export default function DayModal({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.1 }}
-              className="flex flex-col gap-3"
+              className="flex flex-col gap-4"
             >
-              {filtered.length === 0 ? (
+              {groups.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-10 gap-2">
                   <span className="text-4xl">🔍</span>
                   <p className="text-sm font-medium" style={{ color: "var(--color-warm-gray)" }}>
@@ -232,7 +247,17 @@ export default function DayModal({
                   </button>
                 </div>
               ) : (
-                filtered.map((deal) => <DealCard key={deal.id} deal={deal} />)
+                groups.map(({ cat, deals: groupDeals }) => (
+                  <div key={cat} className="flex flex-col gap-2">
+                    <p
+                      className="text-[11px] font-semibold uppercase tracking-wider pt-1"
+                      style={{ color: "var(--color-warm-gray)" }}
+                    >
+                      {CATEGORY_LABELS[cat]} ({groupDeals.length})
+                    </p>
+                    {groupDeals.map((deal) => <DealCard key={deal.id} deal={deal} />)}
+                  </div>
+                ))
               )}
             </motion.div>
           </AnimatePresence>
