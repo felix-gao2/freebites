@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Restaurant {
-  id           String  @id @default(cuid())
+  id           String             @id @default(cuid())
   name         String
   chain        String?
   address      String?
@@ -16,7 +16,8 @@ model Restaurant {
   lng          Float?
   hours        String?
   website      String?
-  gtaLocations Boolean @default(true)
+  gtaLocations Boolean            @default(true)
+  category     RestaurantCategory @default(fast_food)
   deals        Deal[]
 }
 
@@ -31,7 +32,7 @@ model Deal {
   tier           Int             @default(1)
   signupRequired Boolean         @default(false)
   signupMethod   String?
-  validityWindow String?
+  validityWindow Json?
   sourceUrl      String?
   lastVerified   DateTime?
   active         Boolean         @default(true)
@@ -58,4 +59,13 @@ enum DealType {
   birthday
   recurring
   one_off
+}
+
+enum RestaurantCategory {
+  coffee_drinks
+  bakeries_sweets
+  fast_food
+  sit_down
+  ice_cream
+  convenience
 }
