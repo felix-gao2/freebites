@@ -1,6 +1,6 @@
 import { startOfMonth, endOfMonth, eachDayOfInterval, getDay, getMonth, getDate, getYear } from "date-fns";
 import type { DealType } from "@/lib/generated/prisma/enums";
-import type { ValidityWindow } from "@/lib/computeValidityRange";
+import { computeValidityRange, type ValidityWindow } from "@/lib/computeValidityRange";
 
 export function parseValidityWindow(w: unknown): ValidityWindow | null {
   if (!w || typeof w !== "object" || Array.isArray(w)) return null;
@@ -48,10 +48,25 @@ export function buildDayMap(
   for (const deal of deals) {
     for (const occ of deal.occurrences) {
       if (occ.isBirthdayDeal) {
-        // show on the birthday date if it falls in this month
-        if (bMonth === month && bDay > 0) {
-          const key = dateKey(year, month, bDay);
-          push(map, key, deal);
+        if (!birthday || bDay === 0) continue;
+        const window = parseValidityWindow(deal.validityWindow);
+        // Fall back to birthday_only if window is missing or unrecognised
+        const effectiveWindow: ValidityWindow = window ?? { type: "birthday_only" };
+
+        // Check both this year and previous year: handles cross-year windows
+        // (e.g. Dec 28 birthday with 30-day window extends into January)
+        for (const birthdayYear of [year, year - 1]) {
+          const birthdayDate = new Date(birthdayYear, bMonth - 1, bDay);
+          const range = computeValidityRange(effectiveWindow, birthdayDate);
+          for (const d of range) {
+            if (getMonth(d) + 1 === month && getYear(d) === year) {
+              const key = toKey(d);
+              // Deduplicate: same deal can't appear twice on the same day
+              if (!map.get(key)?.some(e => e.id === deal.id)) {
+                push(map, key, deal);
+              }
+            }
+          }
         }
         continue;
       }
