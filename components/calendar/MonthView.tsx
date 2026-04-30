@@ -173,11 +173,11 @@ function DayCell({
           {deals.slice(0, 3).map((deal) => (
             <span
               key={deal.id}
-              className="inline-block rounded-full px-1.5 py-px text-[9px] font-semibold leading-none text-white truncate max-w-[70px]"
+              className="inline-block rounded-full px-1.5 py-px text-[9px] font-semibold leading-none text-white truncate max-w-[80px]"
               style={{ background: DEAL_CHIP_COLORS[deal.dealType] ?? "#7A6960" }}
               title={deal.title}
             >
-              {deal.restaurant.name.split(" ")[0]}
+              {deal.marquee ? "★ " : ""}{chipLabel(deal)}
             </span>
           ))}
           {deals.length > 3 && (
@@ -192,6 +192,16 @@ function DayCell({
       )}
     </button>
   );
+}
+
+function chipLabel(deal: DealWithOccurrences): string {
+  if (deal.dealType === "national_day") {
+    return deal.title
+      .replace(/^National /, "")
+      .replace(/ Day.*$/, "")
+      .split(" ").slice(0, 2).join(" ");
+  }
+  return deal.restaurant.name.split(" ")[0];
 }
 
 function parseBirthday(raw: string): [number, number] {
