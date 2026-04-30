@@ -33,6 +33,7 @@ model Deal {
   signupRequired Boolean         @default(false)
   signupMethod   String?
   validityWindow Json?
+  marquee        Boolean         @default(false)
   sourceUrl      String?
   lastVerified   DateTime?
   active         Boolean         @default(true)

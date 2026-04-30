@@ -19,6 +19,7 @@ export type DealWithOccurrences = {
   signupRequired: boolean;
   signupMethod: string | null;
   validityWindow: unknown;
+  marquee: boolean;
   sourceUrl: string | null;
   lastVerified: Date | null;
   active: boolean;

@@ -105,6 +105,9 @@ const RESTAURANTS: Array<[string, string, Category, string]> = [
 
   // Ice Cream — Tier 2
   ["dairyqueen",        "Dairy Queen Canada",        "ice_cream",       "https://www.dairyqueen.com/en-us/"],
+
+  // National Food Days placeholder (no map pin — lat/lng are null)
+  ["national_days",     "National Food Days",        "fast_food",       ""],
 ];
 
 // ── DEAL DEFINITIONS ──────────────────────────────────────────────────────────
@@ -113,12 +116,15 @@ type DealRow = {
   restaurantId: string;
   title: string;
   description: string;
-  terms: string;
+  terms: string | null;
+  dealType?: "birthday" | "national_day";
   tier: 1 | 2;
   signupRequired: boolean;
-  signupMethod: string;
-  validityWindow: ValidityWindow;
-  sourceUrl: string;
+  signupMethod: string | null;
+  validityWindow?: ValidityWindow;
+  marquee?: boolean;
+  recurrenceRule?: string;
+  sourceUrl: string | null;
 };
 
 function deals(r: Record<string, { id: string }>): DealRow[] {
@@ -725,6 +731,363 @@ function deals(r: Record<string, { id: string }>): DealRow[] {
       validityWindow: { type: "birthday_only" },
       sourceUrl: "https://www.dairyqueen.com/en-us/",
     },
+
+    // ── NATIONAL FOOD DAYS ───────────────────────────────────────────────────
+    // Generic (national_days placeholder restaurant)
+    {
+      restaurantId: r.national_days.id,
+      title: "New Year's Day",
+      description: "Kick off the new year — many GTA spots run free or BOGO offers on January 1st.",
+      terms: "Offers vary by location. Verify before visiting.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:01-01", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Popcorn Day",
+      description: "Celebrate the humble kernel — check movie theatres and specialty popcorn shops for free samples.",
+      terms: "Offers vary by location.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:01-19", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Pie Day",
+      description: "A day for pie lovers — bakeries and cafés around the GTA often offer free slices.",
+      terms: "Offers vary by location.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:01-23", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Peanut Butter Day",
+      description: "The nuttiest day of January — look for PB-themed freebies at smoothie bars and bakeries.",
+      terms: "Offers vary by location.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:01-24", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Croissant Day",
+      description: "Flaky, buttery, and free — bakeries often give away croissants to celebrate.",
+      terms: "Offers vary by location.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:01-30", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Pizza Day",
+      description: "Pizza chains and local spots frequently run free slice or BOGO promotions on February 9th.",
+      terms: "Offers vary by location. App or signup may be required at chain restaurants.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:02-09", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Pancake Day",
+      description: "Shrove Tuesday — IHOP, Cora, and local diners often serve free pancakes. Date shifts yearly with Easter; the listed date is approximate.",
+      terms: "Date varies with the lunar calendar (47 days before Easter). Verify current-year date before visiting.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:02-17", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Margarita Day",
+      description: "Bar patrons rejoice — many GTA restaurants and bars offer free or $1 margaritas on February 22nd.",
+      terms: "Must be of legal drinking age (19+ in Ontario). Offers vary.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:02-22", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "Pi Day (3.14)",
+      description: "Pizza and pie chains celebrate π with BOGO pizzas, free slices, and $3.14 deals on March 14th.",
+      terms: "Offers vary. Many pizza chains run same-day app deals.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:03-14", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "St. Patrick's Day",
+      description: "Pubs and Irish-themed restaurants around the GTA offer free appetizers, green food, and drink specials.",
+      terms: "Must be of legal drinking age (19+ in Ontario) for alcohol promotions.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:03-17", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Ravioli Day",
+      description: "Italian restaurants mark the occasion with complimentary pasta bites or pasta-day promotions.",
+      terms: "Offers vary by location.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:03-20", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Beer Day",
+      description: "Breweries and pubs across the GTA often pour free tasters or run pint specials on April 7th.",
+      terms: "Must be of legal drinking age (19+ in Ontario).",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:04-07", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Grilled Cheese Day",
+      description: "Sandwich shops and diners celebrate with free or discounted grilled cheese on April 12th.",
+      terms: "Offers vary by location.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:04-12", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "Cinco de Mayo",
+      description: "Mexican chains and restaurants across the GTA run free guac, taco, and drink specials on May 5th.",
+      terms: "Offers vary. Alcohol promos require 19+.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:05-05", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Corn on the Cob Day",
+      description: "A summer start — street corn vendors and fast-casual spots sometimes run free corn promos.",
+      terms: "Offers vary by location.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:06-11", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Sushi Day",
+      description: "Sushi restaurants and chains offer complimentary rolls or discounted omakase on June 18th.",
+      terms: "Offers vary by location.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:06-18", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Sugar Cookie Day",
+      description: "Bakeries and cafés hand out free sugar cookies on July 9th.",
+      terms: "Offers vary by location.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:07-09", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National French Fry Day",
+      description: "Fast food chains and burger spots frequently offer free fries on July 13th — often via app.",
+      terms: "Offers vary. App or signup may be required.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:07-13", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Ice Cream Day",
+      description: "Ice cream shops across the GTA give away free scoops on the third Sunday of July.",
+      terms: "Offers vary by location. Some require app signup.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:07-20", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Cheesecake Day",
+      description: "Bakeries and dessert spots often serve a free slice of cheesecake on July 30th.",
+      terms: "Offers vary by location.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:07-30", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Chocolate Chip Cookie Day",
+      description: "Cookie shops and cafés celebrate with free chocolate chip cookies on August 4th.",
+      terms: "Offers vary by location.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:08-04", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Root Beer Float Day",
+      description: "A&W Canada has historically offered a free root beer float on August 6th. Confirm before visiting.",
+      terms: "A&W historically participates. Verify current-year offer at a&w.ca.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:08-06", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Soft Serve Ice Cream Day",
+      description: "Dairy Queen, McDonald's, and soft-serve shops often run free cone promos on August 19th.",
+      terms: "Offers vary. Confirm at participating locations.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:08-19", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Waffle Day",
+      description: "Waffle houses and breakfast chains celebrate with free or discounted waffles on August 24th.",
+      terms: "Offers vary by location.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:08-24", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Burger Day",
+      description: "Burger chains across the GTA run BOGO or free burger deals on August 27th.",
+      terms: "Offers vary. App or signup often required.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:08-27", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Cheese Pizza Day",
+      description: "Simple and classic — pizza chains offer free cheese slices or BOGO pies on September 5th.",
+      terms: "Offers vary. App or signup may be required.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:09-05", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Guacamole Day",
+      description: "Mexican chains offer free guac upgrades or free chips & guac on September 16th.",
+      terms: "Offers vary. Chipotle and similar chains often participate.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:09-16", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Pepperoni Pizza Day",
+      description: "Pizza chains celebrate pepperoni's reign with free slices and BOGO deals on September 20th.",
+      terms: "Offers vary. App or signup may be required.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:09-20", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Dessert Day",
+      description: "Bakeries and restaurants across the GTA offer free desserts and sweet samples on October 14th.",
+      terms: "Offers vary by location.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:10-14", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "Halloween",
+      description: "Many GTA chains and cafés run free treats, candy promotions, and costume discounts on October 31st.",
+      terms: "Offers vary widely by location. Some require costume.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:10-31", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Sandwich Day",
+      description: "Sandwich chains celebrate with free 6-inch subs, BOGO deals, or free add-ons on November 3rd.",
+      terms: "Offers vary. App or signup often required at chain restaurants.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:11-03", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "Remembrance Day",
+      description: "Many GTA businesses offer free food and drink to veterans and active military on November 11th.",
+      terms: "Valid military ID or service proof typically required.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:11-11", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Brownie Day",
+      description: "Bakeries and coffee shops hand out free brownies or brownie bites on December 8th.",
+      terms: "Offers vary by location.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:12-08", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "National Bacon Day",
+      description: "Breakfast spots and burger joints celebrate with free bacon add-ons on December 30th.",
+      terms: "Offers vary by location.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:12-30", sourceUrl: null,
+    },
+    {
+      restaurantId: r.national_days.id,
+      title: "New Year's Eve",
+      description: "Bars, restaurants, and venues across the GTA run free appetizers and drink promos to close the year.",
+      terms: "Alcohol promos require 19+. Offers vary widely.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:12-31", sourceUrl: null,
+    },
+
+    // Marquee national days — specific restaurant deals
+    {
+      restaurantId: r.chipotle.id,
+      title: "National Burrito Day — Free entrée with Chipotle Rewards",
+      description: "Chipotle Burrito Vault unlocks a free entrée for Rewards members every National Burrito Day.",
+      terms: "Chipotle Rewards required. Check chipotle.com/national-burrito-day for current-year offer details.",
+      dealType: "national_day", tier: 1, marquee: true, signupRequired: true, signupMethod: "Chipotle Rewards app",
+      recurrenceRule: "yearly:04-02",
+      sourceUrl: "https://www.chipotle.com/",
+    },
+    {
+      restaurantId: r.mrpretzels.id,
+      title: "National Pretzel Day",
+      description: "Mr. Pretzels celebrates National Pretzel Day with free or discounted pretzels at GTA mall locations.",
+      terms: "Verify participation at your local Mr. Pretzels before visiting.",
+      dealType: "national_day", tier: 1, signupRequired: false, signupMethod: null,
+      recurrenceRule: "yearly:04-26",
+      sourceUrl: "https://www.mrpretzels.ca/",
+    },
+    {
+      restaurantId: r.krispykreme.id,
+      title: "National Doughnut Day — Free doughnut",
+      description: "Krispy Kreme gives away a free doughnut of your choice to every guest — no purchase required — on National Doughnut Day.",
+      terms: "No purchase necessary. One per customer. In-store only at participating locations.",
+      dealType: "national_day", tier: 1, marquee: true, signupRequired: false, signupMethod: "Walk in",
+      recurrenceRule: "yearly:june-first-friday",
+      sourceUrl: "https://krispykreme.ca/",
+    },
+    {
+      restaurantId: r.timhortons.id,
+      title: "National Doughnut Day — Free doughnut",
+      description: "Tim Hortons offers a free doughnut with any beverage purchase on National Doughnut Day (first Friday of June).",
+      terms: "Beverage purchase required. Valid at participating GTA Tim Hortons locations.",
+      dealType: "national_day", tier: 1, marquee: true, signupRequired: false, signupMethod: "Walk in",
+      recurrenceRule: "yearly:june-first-friday",
+      sourceUrl: "https://www.timhortons.ca/",
+    },
+    {
+      restaurantId: r["7eleven"].id,
+      title: "7-Eleven Day — Free Slurpee",
+      description: "Every July 11th is 7-Eleven's birthday — walk in and grab a free small Slurpee, no purchase needed.",
+      terms: "Free small Slurpee, one per customer. Valid all day at GTA 7-Eleven locations.",
+      dealType: "national_day", tier: 1, marquee: true, signupRequired: false, signupMethod: "Walk in",
+      recurrenceRule: "yearly:07-11",
+      sourceUrl: "https://www.7-eleven.ca/",
+    },
+    {
+      restaurantId: r.harveys.id,
+      title: "National Cheeseburger Day — Free burger deal",
+      description: "Harvey's typically runs a free or BOGO cheeseburger offer via their app on National Cheeseburger Day.",
+      terms: "Burger Boss / Burger Lovers rewards app likely required. Confirm offer at harveys.ca.",
+      dealType: "national_day", tier: 1, marquee: true, signupRequired: true, signupMethod: "Burger Boss app",
+      recurrenceRule: "yearly:09-18",
+      sourceUrl: "https://www.harveys.ca/",
+    },
+    {
+      restaurantId: r.starbucks.id,
+      title: "National Coffee Day — Free or discounted drink",
+      description: "Starbucks and other major coffee chains offer free drinks or BOGO promotions on National Coffee Day.",
+      terms: "Starbucks Rewards may be required. Confirm current-year offer in the app.",
+      dealType: "national_day", tier: 1, marquee: true, signupRequired: true, signupMethod: "Starbucks Rewards app",
+      recurrenceRule: "yearly:09-29",
+      sourceUrl: "https://www.starbucks.ca/",
+    },
+    {
+      restaurantId: r.chipotle.id,
+      title: "National Taco Day — Free taco with Chipotle Rewards",
+      description: "Chipotle Rewards members get a free taco on National Taco Day — one of the best fast-casual giveaways of the year.",
+      terms: "Chipotle Rewards required. Confirm current-year offer at chipotle.com.",
+      dealType: "national_day", tier: 1, marquee: true, signupRequired: true, signupMethod: "Chipotle Rewards app",
+      recurrenceRule: "yearly:10-04",
+      sourceUrl: "https://www.chipotle.com/",
+    },
   ];
 }
 
@@ -752,33 +1115,37 @@ async function main() {
   );
   const r = Object.fromEntries(rows);
 
-  // Seed all Tier 1 birthday deals
   const dealList = deals(r);
   for (const d of dealList) {
+    const type = d.dealType ?? "birthday";
     await prisma.deal.create({
       data: {
         restaurantId: d.restaurantId,
         title: d.title,
         description: d.description,
         terms: d.terms,
-        dealType: "birthday",
+        dealType: type,
         tier: d.tier,
+        marquee: d.marquee ?? false,
         signupRequired: d.signupRequired,
         signupMethod: d.signupMethod,
-        validityWindow: d.validityWindow,
+        validityWindow: d.validityWindow ?? undefined,
         sourceUrl: d.sourceUrl,
         lastVerified: TODAY,
         active: true,
         occurrences: {
-          create: { isBirthdayDeal: true },
+          create: d.recurrenceRule
+            ? { isBirthdayDeal: false, recurrenceRule: d.recurrenceRule }
+            : { isBirthdayDeal: true },
         },
       },
     });
   }
 
-  const t1 = dealList.filter(d => d.tier === 1).length;
-  const t2 = dealList.filter(d => d.tier === 2).length;
-  console.log(`Seed complete — ${RESTAURANTS.length} restaurants, ${t1} Tier 1 + ${t2} Tier 2 birthday deals.`);
+  const bdayT1 = dealList.filter(d => (d.dealType ?? "birthday") === "birthday" && d.tier === 1).length;
+  const bdayT2 = dealList.filter(d => (d.dealType ?? "birthday") === "birthday" && d.tier === 2).length;
+  const natDays = dealList.filter(d => d.dealType === "national_day").length;
+  console.log(`Seed complete — ${RESTAURANTS.length} restaurants, ${bdayT1} Tier 1 + ${bdayT2} Tier 2 birthday deals, ${natDays} national food days.`);
 }
 
 main()
