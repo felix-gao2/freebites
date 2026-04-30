@@ -1,7 +1,13 @@
 "use client";
 
+import { useState, useMemo, useRef, useEffect } from "react";
 import { format } from "date-fns";
+import { motion, AnimatePresence } from "framer-motion";
 import type { DealWithOccurrences } from "@/lib/deals";
+
+type TierFilter   = "all" | "truly_free" | "with_purchase";
+type SignupFilter  = "all" | "no_prep" | "app" | "newsletter";
+type CategoryFilter = "all" | "coffee_drinks" | "bakeries_sweets" | "fast_food" | "sit_down" | "ice_cream" | "convenience";
 
 const TIER_LABEL: Record<number, string> = {
   1: "Truly free",
@@ -16,6 +22,19 @@ const TYPE_EMOJI: Record<string, string> = {
   one_off:      "⚡",
 };
 
+const CATEGORY_LABELS: Record<string, string> = {
+  coffee_drinks:   "Coffee & Drinks",
+  bakeries_sweets: "Bakeries & Sweets",
+  fast_food:       "Fast Food",
+  sit_down:        "Sit-Down",
+  ice_cream:       "Ice Cream",
+  convenience:     "Convenience",
+};
+
+const ALL_CATEGORIES: CategoryFilter[] = [
+  "coffee_drinks", "bakeries_sweets", "fast_food", "sit_down", "ice_cream", "convenience",
+];
+
 export default function DayModal({
   date,
   deals,
@@ -25,13 +44,59 @@ export default function DayModal({
   deals: DealWithOccurrences[];
   onClose: () => void;
 }) {
+  const [tier, setTier]         = useState<TierFilter>("all");
+  const [signup, setSignup]     = useState<SignupFilter>("all");
+  const [category, setCategory] = useState<CategoryFilter>("all");
+  const [catOpen, setCatOpen]   = useState(false);
+  const dropdownRef             = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!catOpen) return;
+    function onMouseDown(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setCatOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onMouseDown);
+    return () => document.removeEventListener("mousedown", onMouseDown);
+  }, [catOpen]);
+
+  // Deals after tier + signup filters (used to compute category counts)
+  const tierSignupFiltered = useMemo(() => deals.filter((d) => {
+    if (tier === "truly_free"    && d.tier !== 1) return false;
+    if (tier === "with_purchase" && d.tier !== 2) return false;
+    if (signup === "no_prep"    && d.signupType !== "no_signup" && d.signupType !== "show_id") return false;
+    if (signup === "app"        && d.signupType !== "app") return false;
+    if (signup === "newsletter" && d.signupType !== "newsletter") return false;
+    return true;
+  }), [deals, tier, signup]);
+
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const d of tierSignupFiltered) {
+      counts[d.restaurant.category] = (counts[d.restaurant.category] ?? 0) + 1;
+    }
+    return counts;
+  }, [tierSignupFiltered]);
+
+  const filtered = useMemo(() => {
+    if (category === "all") return tierSignupFiltered;
+    return tierSignupFiltered.filter((d) => d.restaurant.category === category);
+  }, [tierSignupFiltered, category]);
+
+  const filterKey = `${tier}-${signup}-${category}`;
+  const filtersActive = tier !== "all" || signup !== "all" || category !== "all";
+
+  function clearFilters() {
+    setTier("all");
+    setSignup("all");
+    setCategory("all");
+  }
+
   return (
     <>
       {/* backdrop */}
-      <div
-        className="fixed inset-0 z-40 bg-black/30"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 z-40 bg-black/30" onClick={onClose} />
 
       {/* sheet */}
       <div
@@ -52,9 +117,18 @@ export default function DayModal({
             <p className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--color-warm-gray)" }}>
               {format(date, "EEEE")}
             </p>
-            <h2 className="text-lg font-bold" style={{ color: "var(--color-forest)" }}>
-              {format(date, "MMMM d, yyyy")}
-            </h2>
+            <div className="flex items-baseline gap-2">
+              <h2 className="text-lg font-bold" style={{ color: "var(--color-forest)" }}>
+                {format(date, "MMMM d, yyyy")}
+              </h2>
+              {deals.length > 0 && (
+                <span className="text-sm" style={{ color: "var(--color-warm-gray)" }}>
+                  {filtersActive
+                    ? `${filtered.length} of ${deals.length}`
+                    : `${deals.length} deal${deals.length !== 1 ? "s" : ""}`}
+                </span>
+              )}
+            </div>
           </div>
           <button
             onClick={onClose}
@@ -66,24 +140,158 @@ export default function DayModal({
           </button>
         </div>
 
+        {/* filter row */}
+        <div
+          className="flex items-center gap-2 px-4 py-2.5 border-b overflow-x-auto shrink-0"
+          style={{ borderColor: "var(--border)", scrollbarWidth: "none" }}
+        >
+          {/* Tier */}
+          <Chip label="All"                active={tier === "all"}           onClick={() => setTier("all")} />
+          <Chip label="Truly Free"         active={tier === "truly_free"}    onClick={() => setTier("truly_free")} />
+          <Chip label="Free with Purchase" active={tier === "with_purchase"} onClick={() => setTier("with_purchase")} />
+
+          <Sep />
+
+          {/* Signup */}
+          <Chip label="All"              active={signup === "all"}       onClick={() => setSignup("all")} />
+          <Chip label="No prep needed"   active={signup === "no_prep"}   onClick={() => setSignup("no_prep")} />
+          <Chip label="App required"     active={signup === "app"}       onClick={() => setSignup("app")} />
+          <Chip label="Newsletter"       active={signup === "newsletter"} onClick={() => setSignup("newsletter")} />
+
+          <Sep />
+
+          {/* Category dropdown */}
+          <div className="relative shrink-0" ref={dropdownRef}>
+            <button
+              onClick={() => setCatOpen((o) => !o)}
+              className="flex items-center gap-1.5 text-xs font-medium rounded-full px-3 py-1 border transition-colors whitespace-nowrap"
+              style={{
+                borderColor: category !== "all" ? "var(--color-terracotta)" : "var(--border)",
+                background:  category !== "all" ? "var(--color-terracotta)" : "transparent",
+                color:       category !== "all" ? "var(--color-cream)"      : "var(--color-warm-gray)",
+              }}
+            >
+              {category === "all" ? "All categories" : CATEGORY_LABELS[category]}
+              <span style={{ fontSize: 9, opacity: 0.7 }}>{catOpen ? "▲" : "▼"}</span>
+            </button>
+
+            <AnimatePresence>
+              {catOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 4 }}
+                  transition={{ duration: 0.12 }}
+                  className="absolute bottom-full mb-2 left-0 rounded-xl border shadow-lg z-10 py-1 min-w-[190px]"
+                  style={{ background: "var(--card)", borderColor: "var(--border)" }}
+                >
+                  <DropdownItem
+                    label="All categories"
+                    active={category === "all"}
+                    count={tierSignupFiltered.length}
+                    onClick={() => { setCategory("all"); setCatOpen(false); }}
+                  />
+                  {ALL_CATEGORIES.filter((cat) => (categoryCounts[cat] ?? 0) > 0).map((cat) => (
+                    <DropdownItem
+                      key={cat}
+                      label={CATEGORY_LABELS[cat]}
+                      active={category === cat}
+                      count={categoryCounts[cat] ?? 0}
+                      onClick={() => { setCategory(cat); setCatOpen(false); }}
+                    />
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
         {/* deal list */}
-        <div className="overflow-y-auto flex-1 px-4 py-3 flex flex-col gap-3">
-          {deals.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-10 gap-2">
-              <span className="text-4xl">🍽️</span>
-              <p className="text-sm font-medium" style={{ color: "var(--color-warm-gray)" }}>
-                No deals on this day
-              </p>
-              <p className="text-xs text-center px-4" style={{ color: "var(--color-warm-gray)" }}>
-                Try a nearby day or check the map for what&apos;s available
-              </p>
-            </div>
-          ) : (
-            deals.map((deal) => <DealCard key={deal.id} deal={deal} />)
-          )}
+        <div className="overflow-y-auto flex-1 px-4 py-3">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={filterKey}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.1 }}
+              className="flex flex-col gap-3"
+            >
+              {filtered.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 gap-2">
+                  <span className="text-4xl">🔍</span>
+                  <p className="text-sm font-medium" style={{ color: "var(--color-warm-gray)" }}>
+                    No deals match these filters
+                  </p>
+                  <button
+                    className="text-xs underline mt-1"
+                    style={{ color: "var(--color-terracotta)" }}
+                    onClick={clearFilters}
+                  >
+                    Clear filters
+                  </button>
+                </div>
+              ) : (
+                filtered.map((deal) => <DealCard key={deal.id} deal={deal} />)
+              )}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </>
+  );
+}
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+function Chip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="shrink-0 text-xs font-medium rounded-full px-3 py-1 border whitespace-nowrap transition-colors"
+      style={{
+        borderColor: active ? "var(--color-terracotta)" : "var(--border)",
+        background:  active ? "var(--color-terracotta)" : "transparent",
+        color:       active ? "var(--color-cream)"      : "var(--color-warm-gray)",
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+function Sep() {
+  return (
+    <div
+      className="shrink-0 h-4 w-px mx-0.5"
+      style={{ background: "var(--border)" }}
+    />
+  );
+}
+
+function DropdownItem({
+  label,
+  active,
+  count,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  count: number;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full flex items-center justify-between px-3 py-1.5 text-xs text-left transition-opacity hover:opacity-70"
+      style={{
+        color:      active ? "var(--color-terracotta)" : "var(--color-forest)",
+        fontWeight: active ? 600 : 400,
+      }}
+    >
+      <span>{label}</span>
+      <span className="ml-4 tabular-nums" style={{ color: "var(--color-warm-gray)" }}>{count}</span>
+    </button>
   );
 }
 
@@ -94,13 +302,13 @@ function DealCard({ deal }: { deal: DealWithOccurrences }) {
       style={{ borderColor: "var(--border)", background: "var(--background)" }}
     >
       {/* type + tier row */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         <span className="text-base">{TYPE_EMOJI[deal.dealType] ?? "🍔"}</span>
         <span
           className="text-[10px] font-semibold uppercase tracking-wide rounded-full px-2 py-0.5"
           style={{
             background: deal.tier === 1 ? "var(--color-forest)" : "var(--muted)",
-            color: deal.tier === 1 ? "var(--color-cream)" : "var(--color-warm-gray)",
+            color:      deal.tier === 1 ? "var(--color-cream)"  : "var(--color-warm-gray)",
           }}
         >
           {TIER_LABEL[deal.tier] ?? "Deal"}

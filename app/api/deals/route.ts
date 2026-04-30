@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   const deals = await prisma.deal.findMany({
     where: { active: true },
     include: {
-      restaurant: { select: { id: true, name: true, website: true } },
+      restaurant: { select: { id: true, name: true, website: true, category: true } },
       occurrences: { select: { isBirthdayDeal: true, recurrenceRule: true, date: true } },
     },
   }) as unknown as DealWithOccurrences[];

@@ -18,13 +18,14 @@ export type DealWithOccurrences = {
   tier: number;
   signupRequired: boolean;
   signupMethod: string | null;
+  signupType: string;
   validityWindow: unknown;
   marquee: boolean;
   sourceUrl: string | null;
   lastVerified: Date | null;
   active: boolean;
   restaurantId: string;
-  restaurant: { id: string; name: string; website: string | null };
+  restaurant: { id: string; name: string; website: string | null; category: string };
   occurrences: { isBirthdayDeal: boolean; recurrenceRule: string | null; date: Date | null }[];
 };
 
