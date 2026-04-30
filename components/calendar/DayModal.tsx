@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { DealWithOccurrences } from "@/lib/deals";
 
 type TierFilter   = "all" | "truly_free" | "with_purchase";
-type SignupFilter  = "all" | "no_prep" | "app" | "newsletter";
+type SignupFilter  = "all" | "no_prep";
 type CategoryFilter = "all" | "coffee_drinks" | "bakeries_sweets" | "fast_food" | "sit_down" | "ice_cream" | "convenience";
 
 const TIER_LABEL: Record<number, string> = {
@@ -76,9 +76,7 @@ export default function DayModal({
   const tierSignupFiltered = useMemo(() => deals.filter((d) => {
     if (tier === "truly_free"    && d.tier !== 1) return false;
     if (tier === "with_purchase" && d.tier !== 2) return false;
-    if (signup === "no_prep"    && d.signupType !== "no_signup" && d.signupType !== "show_id") return false;
-    if (signup === "app"        && d.signupType !== "app") return false;
-    if (signup === "newsletter" && d.signupType !== "newsletter") return false;
+    if (signup === "no_prep" && d.signupType !== "no_signup" && d.signupType !== "show_id") return false;
     return true;
   }), [deals, tier, signup]);
 
@@ -177,10 +175,8 @@ export default function DayModal({
           <Sep />
 
           {/* Signup */}
-          <Chip label="All"              active={signup === "all"}       onClick={() => setSignup("all")} />
-          <Chip label="No prep needed"   active={signup === "no_prep"}   onClick={() => setSignup("no_prep")} />
-          <Chip label="App required"     active={signup === "app"}       onClick={() => setSignup("app")} />
-          <Chip label="Newsletter"       active={signup === "newsletter"} onClick={() => setSignup("newsletter")} />
+          <Chip label="All"            active={signup === "all"}     onClick={() => setSignup("all")} />
+          <Chip label="No prep needed" active={signup === "no_prep"} onClick={() => setSignup("no_prep")} />
 
           <Sep />
 
