@@ -118,23 +118,23 @@ function DayCell({
     <button
       onClick={onClick}
       className="relative flex flex-col items-start p-1.5 h-full text-left transition-colors hover:brightness-95 focus:outline-none"
-      style={{ background: bg }}
+      style={{
+        background: bg,
+        boxShadow: isBirthday ? "inset 0 0 0 3px var(--color-terracotta)" : undefined,
+      }}
     >
       {/* date number */}
       <span
         className={[
-          "text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full",
+          "text-xs w-6 h-6 flex items-center justify-center rounded-full",
           today ? "text-[var(--color-cream)]" : "",
           !inMonth ? "opacity-35" : "",
         ].join(" ")}
         style={{
           background: today ? "var(--color-terracotta)" : "transparent",
-          color: today
-            ? "var(--color-cream)"
-            : isBirthday
-            ? "var(--color-terracotta-dark)"
-            : "var(--color-forest)",
-          fontWeight: today || isBirthday ? 700 : 500,
+          color: today ? "var(--color-cream)" : isBirthday ? "var(--color-terracotta)" : "var(--color-forest)",
+          fontWeight: today || isBirthday ? 800 : 500,
+          fontSize: isBirthday ? "0.8rem" : undefined,
         }}
       >
         {label}
