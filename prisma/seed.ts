@@ -5,6 +5,8 @@ import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, SignupType } from "../lib/generated/prisma/client";
 import type { ValidityWindow } from "../lib/computeValidityRange";
+import * as fs from "fs";
+import * as path from "path";
 
 function deriveSignupType(signupRequired: boolean, signupMethod: string | null): SignupType {
   const m = (signupMethod ?? "").toLowerCase();
@@ -1109,7 +1111,8 @@ async function main() {
   const adapter = new PrismaPg(pool);
   prisma = new PrismaClient({ adapter });
 
-  // Wipe deals + occurrences so the seed is idempotent
+  // Wipe in FK order so the seed is idempotent
+  await prisma.location.deleteMany();
   await prisma.dealOccurrence.deleteMany();
   await prisma.deal.deleteMany();
 
@@ -1154,10 +1157,47 @@ async function main() {
     });
   }
 
+  // ── LOCATIONS ─────────────────────────────────────────────────────────────────
+  type OsmLoc = { osm_id: number; lat: number; lng: number; address?: string };
+  const locPath = path.join(__dirname, "locations.json");
+  const locData: Record<string, OsmLoc[]> = fs.existsSync(locPath)
+    ? JSON.parse(fs.readFileSync(locPath, "utf-8"))
+    : {};
+
+  // Fetch current restaurant lat/lng for fallback
+  const restCoords = await prisma.restaurant.findMany({ select: { id: true, lat: true, lng: true } });
+  const coordsById = Object.fromEntries(restCoords.map((r) => [r.id, { lat: r.lat, lng: r.lng }]));
+
+  let locCount = 0;
+  for (const [restaurantId] of RESTAURANTS) {
+    const osmLocs = locData[restaurantId];
+    if (osmLocs && osmLocs.length > 0) {
+      await prisma.location.createMany({
+        data: osmLocs.map((loc) => ({
+          restaurantId,
+          lat: loc.lat,
+          lng: loc.lng,
+          address: loc.address ?? null,
+          osmId: String(loc.osm_id),
+        })),
+        skipDuplicates: true,
+      });
+      locCount += osmLocs.length;
+    } else {
+      const coords = coordsById[restaurantId];
+      if (coords?.lat != null && coords?.lng != null) {
+        await prisma.location.create({
+          data: { restaurantId, lat: coords.lat, lng: coords.lng },
+        });
+        locCount += 1;
+      }
+    }
+  }
+
   const bdayT1 = dealList.filter(d => (d.dealType ?? "birthday") === "birthday" && d.tier === 1).length;
   const bdayT2 = dealList.filter(d => (d.dealType ?? "birthday") === "birthday" && d.tier === 2).length;
   const natDays = dealList.filter(d => d.dealType === "national_day").length;
-  console.log(`Seed complete — ${RESTAURANTS.length} restaurants, ${bdayT1} Tier 1 + ${bdayT2} Tier 2 birthday deals, ${natDays} national food days.`);
+  console.log(`Seed complete — ${RESTAURANTS.length} restaurants, ${bdayT1} Tier 1 + ${bdayT2} Tier 2 birthday deals, ${natDays} national food days, ${locCount} locations.`);
 }
 
 main()
