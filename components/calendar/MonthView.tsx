@@ -126,7 +126,7 @@ function DayCell({
       {/* date number */}
       <span
         className={[
-          "text-xs w-6 h-6 flex items-center justify-center rounded-full",
+          "text-base w-8 h-8 flex items-center justify-center rounded-full",
           today ? "text-[var(--color-cream)]" : "",
           !inMonth ? "opacity-35" : "",
         ].join(" ")}
@@ -134,7 +134,6 @@ function DayCell({
           background: today ? "var(--color-terracotta)" : "transparent",
           color: today ? "var(--color-cream)" : isBirthday ? "var(--color-terracotta)" : "var(--color-forest)",
           fontWeight: today || isBirthday ? 800 : 500,
-          fontSize: isBirthday ? "0.8rem" : undefined,
         }}
       >
         {label}
