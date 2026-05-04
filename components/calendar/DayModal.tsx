@@ -145,7 +145,7 @@ export default function DayModal({
           style={{ borderColor: "var(--border)", scrollbarWidth: "none" }}
         >
           {/* Tier */}
-          <Chip label="All"                active={tier === "all" && category === "all"} onClick={() => { setTier("all"); setCategory("all"); }} />
+          <Chip label="All"                active={tier === "all" && category === "all" && signup === "all"} onClick={() => { setTier("all"); setCategory("all"); setSignup("all"); }} />
           <Chip label="Truly Free"         active={tier === "truly_free"}    onClick={() => setTier("truly_free")} />
           <Chip label="Free with Purchase" active={tier === "with_purchase"} onClick={() => setTier("with_purchase")} />
 
