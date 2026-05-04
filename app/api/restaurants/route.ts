@@ -7,6 +7,7 @@ export type RestaurantPin = {
   lat: number;
   lng: number;
   website: string | null;
+  category: string;
   deals: {
     id: string;
     title: string;
@@ -14,6 +15,7 @@ export type RestaurantPin = {
     terms: string | null;
     dealType: string;
     tier: number;
+    signupType: string;
     signupRequired: boolean;
     signupMethod: string | null;
     validityWindow: unknown;
@@ -43,6 +45,7 @@ export async function GET() {
           terms: true,
           dealType: true,
           tier: true,
+          signupType: true,
           signupRequired: true,
           signupMethod: true,
           validityWindow: true,
@@ -67,6 +70,7 @@ export async function GET() {
       lat: r.lat!,
       lng: r.lng!,
       website: r.website,
+      category: r.category,
       deals: r.deals.map((d) => ({
         ...d,
         occurrences: d.occurrences.map((occ) => ({

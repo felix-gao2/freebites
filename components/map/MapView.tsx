@@ -23,7 +23,6 @@ export default function MapView({
   const [pins, setPins] = useState<RestaurantPin[]>([]);
   const [selectedPin, setSelectedPin] = useState<RestaurantPin | null>(null);
 
-  // Fetch restaurant pins once
   useEffect(() => {
     fetch("/api/restaurants")
       .then((r) => r.json())
@@ -31,7 +30,6 @@ export default function MapView({
       .catch(console.error);
   }, []);
 
-  // Init map
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
@@ -59,45 +57,31 @@ export default function MapView({
     };
   }, []);
 
-  // Add / refresh markers when pins or filter changes
   useEffect(() => {
     const map = mapRef.current;
     if (!map || pins.length === 0) return;
 
-    // Remove old markers
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
 
-    const today = new Date();
-    const todayKey = fmtKey(today);
-    const weekKeys = new Set(
-      Array.from({ length: 7 }, (_, i) => {
-        const d = new Date(today);
-        d.setDate(d.getDate() + i);
-        return fmtKey(d);
-      }),
-    );
-    const [bMonth, bDay] = parseBirthday(birthday);
+    const { tier, signup, category } = filter;
+    const isAll = tier === "all" && signup === "all" && category === "all";
 
-    const filtered = pins.filter((pin) => {
-      if (filter === "all") return true;
-      return pin.deals.some((deal) => {
-        if (filter === "birthday") return deal.dealType === "birthday";
-        if (filter === "today") return isDealOnDate(deal, todayKey, bMonth, bDay);
-        if (filter === "week") {
-          for (const k of weekKeys) {
-            if (isDealOnDate(deal, k, bMonth, bDay)) return true;
-          }
-          return false;
-        }
-        return true;
-      });
-    });
+    const filtered = isAll
+      ? pins
+      : pins.filter((pin) => {
+          if (category !== "all" && pin.category !== category) return false;
+          return pin.deals.some((deal) => {
+            if (tier === "truly_free"    && deal.tier !== 1) return false;
+            if (tier === "with_purchase" && deal.tier !== 2) return false;
+            if (signup === "no_prep" && deal.signupType !== "no_signup" && deal.signupType !== "show_id") return false;
+            return true;
+          });
+        });
 
     const addMarkers = () => {
       filtered.forEach((pin) => {
         const el = document.createElement("div");
-        el.className = "mapbox-pin";
         el.style.cssText = `
           width: 32px; height: 32px; border-radius: 50%;
           background: #C1613A; border: 2px solid #fff;
@@ -114,6 +98,19 @@ export default function MapView({
 
         markersRef.current.push(marker);
       });
+
+      // Fit bounds to visible pins; fall back to GTA default when all filters cleared
+      if (filtered.length === 0 || isAll) {
+        map.flyTo({ center: GTA_CENTER, zoom: GTA_ZOOM });
+      } else if (filtered.length === 1) {
+        map.flyTo({ center: [filtered[0].lng, filtered[0].lat], zoom: 13 });
+      } else {
+        const bounds = filtered.reduce(
+          (b, pin) => b.extend([pin.lng, pin.lat]),
+          new mapboxgl.LngLatBounds([filtered[0].lng, filtered[0].lat], [filtered[0].lng, filtered[0].lat]),
+        );
+        map.fitBounds(bounds, { padding: 80, maxZoom: 14 });
+      }
     };
 
     if (map.loaded()) {
@@ -140,59 +137,4 @@ export default function MapView({
       )}
     </div>
   );
-}
-
-function fmtKey(d: Date) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-function parseBirthday(raw: string): [number, number] {
-  const p = raw.split("-");
-  return [parseInt(p[1], 10), parseInt(p[2], 10)];
-}
-
-const DOW_MAP: Record<string, number> = {
-  sunday: 0, monday: 1, tuesday: 2, wednesday: 3,
-  thursday: 4, friday: 5, saturday: 6,
-};
-
-function firstWeekdayOfMonth(year: number, month: number, dow: number): number {
-  const d = new Date(year, month - 1, 1);
-  const diff = (dow - d.getDay() + 7) % 7;
-  return 1 + diff;
-}
-
-function isDealOnDate(
-  deal: RestaurantPin["deals"][number],
-  dateKey: string,
-  bMonth: number,
-  bDay: number,
-): boolean {
-  const [year, month, day] = dateKey.split("-").map(Number);
-
-  return deal.occurrences.some((occ) => {
-    if (occ.isBirthdayDeal) {
-      return bMonth === month && bDay === day;
-    }
-    if (occ.recurrenceRule) {
-      const rule = occ.recurrenceRule;
-      if (rule.startsWith("weekly:")) {
-        const targetDow = DOW_MAP[rule.slice("weekly:".length).toLowerCase()];
-        if (targetDow === undefined) return false;
-        return new Date(year, month - 1, day).getDay() === targetDow;
-      }
-      if (rule.startsWith("yearly:")) {
-        const part = rule.slice("yearly:".length);
-        if (part === "june-first-friday") {
-          return month === 6 && day === firstWeekdayOfMonth(year, 6, 5);
-        }
-        const [mm, dd] = part.split("-").map(Number);
-        return month === mm && day === dd;
-      }
-    }
-    if (occ.date) {
-      return occ.date.startsWith(dateKey);
-    }
-    return false;
-  });
 }
