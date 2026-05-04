@@ -266,12 +266,12 @@ function DealCard({ deal }: { deal: DealWithOccurrences }) {
       </div>
 
       {/* restaurant */}
-      <p className="text-xs font-semibold" style={{ color: "var(--color-terracotta)" }}>
+      <p className="text-lg font-bold leading-tight" style={{ color: "var(--color-terracotta)" }}>
         {deal.restaurant.name}
       </p>
 
       {/* title */}
-      <p className="text-sm font-medium leading-snug" style={{ color: "var(--color-forest)" }}>
+      <p className="text-base font-medium leading-snug" style={{ color: "var(--color-forest)" }}>
         {deal.title}
       </p>
 
