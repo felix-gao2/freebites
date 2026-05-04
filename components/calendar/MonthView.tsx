@@ -39,9 +39,9 @@ export default function MonthView({
   const isFirstLoad = loading && Object.keys(dayMap).length === 0;
 
   return (
-    <div className="w-full" style={{ opacity: !isFirstLoad && loading ? 0.5 : 1, transition: "opacity 0.2s" }}>
+    <div className="w-full flex flex-col flex-1" style={{ opacity: !isFirstLoad && loading ? 0.5 : 1, transition: "opacity 0.2s" }}>
       {/* day-of-week headers */}
-      <div className="grid grid-cols-7 mb-1">
+      <div className="grid grid-cols-7 mb-1 shrink-0">
         {DAY_HEADERS.map((d) => (
           <div
             key={d}
@@ -54,7 +54,7 @@ export default function MonthView({
       </div>
 
       {/* day cells */}
-      <div className="grid grid-cols-7 gap-px" style={{ background: "var(--border)" }}>
+      <div className="grid grid-cols-7 gap-px flex-1" style={{ background: "var(--border)", gridAutoRows: "1fr" }}>
         {days.map((day) => {
           const inMonth = isSameMonth(day, cursor);
           const today = isToday(day);
@@ -117,7 +117,7 @@ function DayCell({
   return (
     <button
       onClick={onClick}
-      className="relative flex flex-col items-start p-1.5 min-h-[52px] sm:min-h-[72px] text-left transition-colors hover:brightness-95 focus:outline-none"
+      className="relative flex flex-col items-start p-1.5 h-full text-left transition-colors hover:brightness-95 focus:outline-none"
       style={{ background: bg }}
     >
       {/* date number */}
@@ -170,7 +170,7 @@ function DayCell({
       {/* desktop: name chips */}
       {!skeleton && inMonth && deals.length > 0 && (
         <div className="mt-1 hidden sm:flex flex-wrap gap-0.5">
-          {deals.slice(0, 3).map((deal) => (
+          {deals.slice(0, 5).map((deal) => (
             <span
               key={deal.id}
               className="inline-block rounded-full px-1.5 py-px text-[9px] font-semibold leading-none text-white truncate max-w-[80px]"
@@ -180,12 +180,12 @@ function DayCell({
               {deal.marquee ? "★ " : ""}{chipLabel(deal)}
             </span>
           ))}
-          {deals.length > 3 && (
+          {deals.length > 5 && (
             <span
               className="inline-block rounded-full px-1.5 py-px text-[9px] font-semibold leading-none"
               style={{ background: "var(--muted)", color: "var(--color-warm-gray)" }}
             >
-              +{deals.length - 3}
+              +{deals.length - 5}
             </span>
           )}
         </div>
