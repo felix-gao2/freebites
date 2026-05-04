@@ -243,11 +243,8 @@ function Sep() {
 }
 
 function DealCard({ deal }: { deal: DealWithOccurrences }) {
-  return (
-    <div
-      className="rounded-xl border p-4 flex flex-col gap-1.5"
-      style={{ borderColor: "var(--border)", background: "var(--background)" }}
-    >
+  const inner = (
+    <>
       {/* type + tier + signup row */}
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-base">{TYPE_EMOJI[deal.dealType] ?? "🍔"}</span>
@@ -289,19 +286,29 @@ function DealCard({ deal }: { deal: DealWithOccurrences }) {
           {deal.terms}
         </p>
       )}
+    </>
+  );
 
-      {/* website link */}
-      {deal.restaurant.website && (
-        <a
-          href={deal.restaurant.website}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-xs underline mt-0.5 self-start"
-          style={{ color: "var(--color-forest-light)" }}
-        >
-          View restaurant →
-        </a>
-      )}
+  const sharedClass = "rounded-xl border p-4 flex flex-col gap-1.5 transition-colors duration-150";
+  const sharedStyle = { borderColor: "var(--border)", background: "var(--background)" };
+
+  if (deal.restaurant.website) {
+    return (
+      <a
+        href={deal.restaurant.website}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={sharedClass + " hover:bg-[oklch(0.96_0.01_60)] cursor-pointer"}
+        style={sharedStyle}
+      >
+        {inner}
+      </a>
+    );
+  }
+
+  return (
+    <div className={sharedClass} style={sharedStyle}>
+      {inner}
     </div>
   );
 }
