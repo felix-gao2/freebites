@@ -19,6 +19,17 @@ model Restaurant {
   gtaLocations Boolean            @default(true)
   category     RestaurantCategory @default(fast_food)
   deals        Deal[]
+  locations    Location[]
+}
+
+model Location {
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  lat          Float
+  lng          Float
+  address      String?
+  osmId        String?    @unique
 }
 
 model Deal {
