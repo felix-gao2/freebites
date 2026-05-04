@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { format, addMonths, subMonths, getMonth, getYear } from "date-fns";
@@ -16,8 +16,6 @@ export default function CalendarPage() {
   const [dayMap, setDayMap] = useState<Record<string, DealWithOccurrences[]>>({});
   const [loadingDeals, setLoadingDeals] = useState(false);
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
-  const [tierFilter, setTierFilter] = useState<Set<number>>(new Set());
-
   useEffect(() => {
     const saved = localStorage.getItem(BIRTHDAY_KEY);
     if (!saved) { router.replace("/"); return; }
@@ -37,35 +35,11 @@ export default function CalendarPage() {
     if (birthday) fetchDeals(cursor, birthday);
   }, [birthday, cursor, fetchDeals]);
 
-  const filteredDayMap = useMemo(() => {
-    if (tierFilter.size === 0) return dayMap;
-    const out: Record<string, DealWithOccurrences[]> = {};
-    for (const [key, deals] of Object.entries(dayMap)) {
-      const filtered = deals.filter((d) => tierFilter.has(d.tier));
-      if (filtered.length) out[key] = filtered;
-    }
-    return out;
-  }, [dayMap, tierFilter]);
-
-  function toggleTier(tier: number) {
-    setTierFilter((prev) => {
-      const next = new Set(prev);
-      next.has(tier) ? next.delete(tier) : next.add(tier);
-      return next;
-    });
-  }
-
   function resetCalendar() {
     setCursor(new Date());
-    setTierFilter(new Set());
   }
 
   if (!birthday) return null;
-
-  const FILTERS = [
-    { tier: 1, label: "Truly Free" },
-    { tier: 2, label: "Free with Purchase" },
-  ];
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -84,37 +58,9 @@ export default function CalendarPage() {
           <span style={{ color: "var(--color-forest)" }}>bites</span>
         </button>
 
-        {/* divider */}
-        <div className="h-6 w-px shrink-0" style={{ background: "var(--border)" }} />
-
-        {/* tier filter pills */}
-        <div className="flex items-center gap-2 shrink-0">
-          {FILTERS.map(({ tier, label }) => {
-            const active = tierFilter.has(tier);
-            return (
-              <button
-                key={tier}
-                onClick={() => toggleTier(tier)}
-                className="rounded-full px-3 py-1.5 text-sm font-medium border transition-colors"
-                style={{
-                  background: active
-                    ? tier === 1 ? "var(--color-forest)" : "var(--color-terracotta)"
-                    : "transparent",
-                  color: active ? "var(--color-cream)" : "var(--color-warm-gray)",
-                  borderColor: active
-                    ? tier === 1 ? "var(--color-forest)" : "var(--color-terracotta)"
-                    : "var(--border)",
-                }}
-              >
-                {active ? "✓ " : ""}{label}
-              </button>
-            );
-          })}
-        </div>
-
         {/* tagline — center fill */}
         <p className="flex-1 text-center text-sm" style={{ color: "var(--color-warm-gray)" }}>
-          Your free food calendar for the GTA · filter deals above · switch to map →
+          Your free food calendar for the GTA
         </p>
 
         {/* right actions */}
@@ -166,11 +112,11 @@ export default function CalendarPage() {
       </div>
 
       {/* ── calendar body ── */}
-      <div className="flex-1 p-4">
+      <div className="flex-1 p-4 flex flex-col">
         <MonthView
           cursor={cursor}
           birthday={birthday}
-          dayMap={filteredDayMap}
+          dayMap={dayMap}
           loading={loadingDeals}
           onDayClick={setSelectedDay}
         />
@@ -185,7 +131,7 @@ export default function CalendarPage() {
             const m = getMonth(selectedDay) + 1;
             const d = selectedDay.getDate();
             const key = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-            return filteredDayMap[key] ?? [];
+            return dayMap[key] ?? [];
           })()}
           onClose={() => setSelectedDay(null)}
         />
