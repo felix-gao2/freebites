@@ -79,35 +79,41 @@ export default function MapView({
           });
         });
 
+    // Collect all visible [lng, lat] points for bounds calculation
+    const allPoints: [number, number][] = filtered.flatMap((pin) =>
+      pin.locations.map((loc) => [loc.lng, loc.lat] as [number, number])
+    );
+
     const addMarkers = () => {
-      filtered.forEach((pin) => {
-        const el = document.createElement("div");
-        el.style.cssText = `
-          width: 32px; height: 32px; border-radius: 50%;
-          background: #C1613A; border: 2px solid #fff;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-          cursor: pointer; display: flex; align-items: center; justify-content: center;
-          font-size: 14px;
-        `;
-        el.textContent = "🍴";
-        el.addEventListener("click", () => setSelectedPin(pin));
+      for (const pin of filtered) {
+        for (const loc of pin.locations) {
+          const el = document.createElement("div");
+          el.style.cssText = `
+            width: 32px; height: 32px; border-radius: 50%;
+            background: #C1613A; border: 2px solid #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 14px;
+          `;
+          el.textContent = "🍴";
+          el.addEventListener("click", () => setSelectedPin(pin));
 
-        const marker = new mapboxgl.Marker({ element: el })
-          .setLngLat([pin.lng, pin.lat])
-          .addTo(map);
+          const marker = new mapboxgl.Marker({ element: el })
+            .setLngLat([loc.lng, loc.lat])
+            .addTo(map);
 
-        markersRef.current.push(marker);
-      });
+          markersRef.current.push(marker);
+        }
+      }
 
-      // Fit bounds to visible pins; fall back to GTA default when all filters cleared
-      if (filtered.length === 0 || isAll) {
+      if (allPoints.length === 0 || isAll) {
         map.flyTo({ center: GTA_CENTER, zoom: GTA_ZOOM });
-      } else if (filtered.length === 1) {
-        map.flyTo({ center: [filtered[0].lng, filtered[0].lat], zoom: 13 });
+      } else if (allPoints.length === 1) {
+        map.flyTo({ center: allPoints[0], zoom: 13 });
       } else {
-        const bounds = filtered.reduce(
-          (b, pin) => b.extend([pin.lng, pin.lat]),
-          new mapboxgl.LngLatBounds([filtered[0].lng, filtered[0].lat], [filtered[0].lng, filtered[0].lat]),
+        const bounds = allPoints.reduce(
+          (b, pt) => b.extend(pt),
+          new mapboxgl.LngLatBounds(allPoints[0], allPoints[0]),
         );
         map.fitBounds(bounds, { padding: 80, maxZoom: 14 });
       }

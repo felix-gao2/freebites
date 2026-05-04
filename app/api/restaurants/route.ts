@@ -4,10 +4,9 @@ import { prisma } from "@/lib/prisma";
 export type RestaurantPin = {
   id: string;
   name: string;
-  lat: number;
-  lng: number;
   website: string | null;
   category: string;
+  locations: { id: string; lat: number; lng: number; address: string | null }[];
   deals: {
     id: string;
     title: string;
@@ -31,11 +30,13 @@ export type RestaurantPin = {
 export async function GET() {
   const restaurants = await prisma.restaurant.findMany({
     where: {
-      lat: { not: null },
-      lng: { not: null },
+      locations: { some: {} },
       deals: { some: { active: true } },
     },
     include: {
+      locations: {
+        select: { id: true, lat: true, lng: true, address: true },
+      },
       deals: {
         where: { active: true },
         select: {
@@ -62,23 +63,20 @@ export async function GET() {
     },
   });
 
-  const pins: RestaurantPin[] = restaurants
-    .filter((r) => r.lat !== null && r.lng !== null)
-    .map((r) => ({
-      id: r.id,
-      name: r.name,
-      lat: r.lat!,
-      lng: r.lng!,
-      website: r.website,
-      category: r.category,
-      deals: r.deals.map((d) => ({
-        ...d,
-        occurrences: d.occurrences.map((occ) => ({
-          ...occ,
-          date: occ.date?.toISOString() ?? null,
-        })),
+  const pins: RestaurantPin[] = restaurants.map((r) => ({
+    id: r.id,
+    name: r.name,
+    website: r.website,
+    category: r.category,
+    locations: r.locations,
+    deals: r.deals.map((d) => ({
+      ...d,
+      occurrences: d.occurrences.map((occ) => ({
+        ...occ,
+        date: occ.date?.toISOString() ?? null,
       })),
-    }));
+    })),
+  }));
 
   return NextResponse.json(pins);
 }
