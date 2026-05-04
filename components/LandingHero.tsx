@@ -172,7 +172,7 @@ export default function LandingHero() {
             transition={{ duration: 0.5, ease: OUT, delay: 0.15 }}
           >
             <em style={{ fontFamily: "var(--font-lora, Georgia, serif)", fontStyle: "italic", color: "var(--color-terracotta)", opacity: 0.9 }}>Free</em>{" "}
-            food across the GTA — <br />
+            food across the GTA:<br />
             birthdays, food days &amp; more.
           </motion.p>
 

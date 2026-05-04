@@ -145,7 +145,7 @@ export default function DayModal({
           style={{ borderColor: "var(--border)", scrollbarWidth: "none" }}
         >
           {/* Tier */}
-          <Chip label="All"                active={tier === "all"}           onClick={() => setTier("all")} />
+          <Chip label="All"                active={tier === "all" && category === "all"} onClick={() => { setTier("all"); setCategory("all"); }} />
           <Chip label="Truly Free"         active={tier === "truly_free"}    onClick={() => setTier("truly_free")} />
           <Chip label="Free with Purchase" active={tier === "with_purchase"} onClick={() => setTier("with_purchase")} />
 
@@ -195,12 +195,14 @@ export default function DayModal({
               ) : (
                 groups.map(({ cat, deals: groupDeals }) => (
                   <div key={cat} className="flex flex-col gap-2">
-                    <p
-                      className="text-[11px] font-semibold uppercase tracking-wider pt-1"
-                      style={{ color: "var(--color-warm-gray)" }}
-                    >
-                      {CATEGORY_LABELS[cat]} ({groupDeals.length})
-                    </p>
+                    {category === "all" && (
+                      <p
+                        className="text-[11px] font-semibold uppercase tracking-wider pt-1"
+                        style={{ color: "var(--color-warm-gray)" }}
+                      >
+                        {CATEGORY_LABELS[cat]} ({groupDeals.length})
+                      </p>
+                    )}
                     {groupDeals.map((deal) => <DealCard key={deal.id} deal={deal} />)}
                   </div>
                 ))
