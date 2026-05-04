@@ -7,9 +7,8 @@ import type { MapFilter } from "@/app/map/page";
 import type { RestaurantPin } from "@/app/api/restaurants/route";
 import PinPopup from "./PinPopup";
 
-// GTA fallback center
-const GTA_CENTER: [number, number] = [-79.3832, 43.6532];
-const GTA_ZOOM = 10;
+const GTA_CENTER: [number, number] = [-79.4, 43.7];
+const GTA_ZOOM = 9;
 
 export default function MapView({
   birthday,
@@ -23,7 +22,6 @@ export default function MapView({
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const [pins, setPins] = useState<RestaurantPin[]>([]);
   const [selectedPin, setSelectedPin] = useState<RestaurantPin | null>(null);
-  const [geoError, setGeoError] = useState(false);
 
   // Fetch restaurant pins once
   useEffect(() => {
@@ -54,21 +52,6 @@ export default function MapView({
 
     map.addControl(new mapboxgl.NavigationControl(), "top-right");
     mapRef.current = map;
-
-    // Try geolocation, fall back to GTA
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude: lat, longitude: lng } = pos.coords;
-          // Only fly to user if they're within GTA bounding box
-          if (lat > 43.4 && lat < 44.1 && lng > -80.0 && lng < -78.8) {
-            map.flyTo({ center: [lng, lat], zoom: 12 });
-          }
-        },
-        () => setGeoError(true),
-        { timeout: 5000 },
-      );
-    }
 
     return () => {
       map.remove();
@@ -143,15 +126,6 @@ export default function MapView({
   return (
     <div className="relative w-full h-full">
       <div ref={containerRef} className="w-full h-full" />
-
-      {geoError && (
-        <div
-          className="absolute top-3 left-1/2 -translate-x-1/2 text-xs px-3 py-1.5 rounded-full shadow"
-          style={{ background: "var(--card)", color: "var(--color-warm-gray)" }}
-        >
-          Location unavailable — showing GTA
-        </div>
-      )}
 
       {!process.env.NEXT_PUBLIC_MAPBOX_TOKEN && (
         <div className="absolute inset-0 flex items-center justify-center" style={{ background: "var(--muted)" }}>
