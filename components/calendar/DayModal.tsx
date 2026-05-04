@@ -141,7 +141,7 @@ export default function DayModal({
 
         {/* filter row */}
         <div
-          className="flex items-center gap-2 px-4 py-2.5 border-b overflow-x-auto shrink-0"
+          className="flex items-center gap-2.5 px-4 py-3 border-b overflow-x-auto shrink-0"
           style={{ borderColor: "var(--border)", scrollbarWidth: "none" }}
         >
           {/* Tier */}
@@ -221,7 +221,7 @@ function Chip({ label, active, onClick }: { label: string; active: boolean; onCl
   return (
     <button
       onClick={onClick}
-      className="shrink-0 text-xs font-medium rounded-full px-3 py-1 border whitespace-nowrap transition-colors"
+      className="shrink-0 text-sm font-medium rounded-full px-4 py-1.5 border whitespace-nowrap transition-colors"
       style={{
         borderColor: active ? "var(--color-terracotta)" : "var(--border)",
         background:  active ? "var(--color-terracotta)" : "transparent",
