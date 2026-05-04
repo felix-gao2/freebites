@@ -194,7 +194,7 @@ export default function DayModal({
                 </div>
               ) : (
                 groups.map(({ cat, deals: groupDeals }) => (
-                  <div key={cat} className="flex flex-col gap-2">
+                  <div key={cat} className="flex flex-col gap-1.5">
                     {category === "all" && (
                       <p
                         className="text-[11px] font-semibold uppercase tracking-wider pt-1"
@@ -289,7 +289,7 @@ function DealCard({ deal }: { deal: DealWithOccurrences }) {
     </>
   );
 
-  const sharedClass = "rounded-xl border p-4 flex flex-col gap-1.5 transition-colors duration-150";
+  const sharedClass = "rounded-xl border px-3.5 py-2.5 flex flex-col gap-1 transition-colors duration-150";
   const sharedStyle = { borderColor: "var(--border)", background: "var(--background)" };
 
   if (deal.restaurant.website) {
