@@ -159,8 +159,9 @@ export default function MapView({
   } | null>(null);
   const readyRef     = useRef(false);
 
-  const [pins, setPins]       = useState<RestaurantPin[]>([]);
-  const [isEmpty, setIsEmpty] = useState(false);
+  const [pins, setPins]         = useState<RestaurantPin[]>([]);
+  const [pinsLoading, setPinsLoading] = useState(true);
+  const [isEmpty, setIsEmpty]   = useState(false);
   const [selectedFeature, setSelectedFeature] = useState<{
     pin: RestaurantPin;
     lat: number;
@@ -173,7 +174,10 @@ export default function MapView({
 
   // Fetch pins once
   useEffect(() => {
-    fetch("/api/restaurants").then((r) => r.json()).then(setPins).catch(console.error);
+    fetch("/api/restaurants")
+      .then((r) => r.json())
+      .then((data) => { setPins(data); setPinsLoading(false); })
+      .catch(() => setPinsLoading(false));
   }, []);
 
   // Init map + source + layers (runs once)
@@ -362,6 +366,36 @@ export default function MapView({
   return (
     <div className="relative w-full h-full">
       <div ref={containerRef} className="w-full h-full" />
+
+      <AnimatePresence>
+        {pinsLoading && (
+          <motion.div
+            key="loading"
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.2 }}
+            className="absolute top-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 rounded-full px-4 py-2 pointer-events-none"
+            style={{
+              background: "var(--card)",
+              border: "1px solid var(--border)",
+              boxShadow: "0 2px 12px rgba(0,0,0,0.10)",
+            }}
+          >
+            <svg
+              className="animate-spin"
+              width="13" height="13" viewBox="0 0 24 24" fill="none"
+              stroke="var(--color-terracotta)" strokeWidth="2.5"
+              strokeLinecap="round"
+            >
+              <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+            </svg>
+            <span className="text-xs font-medium" style={{ color: "var(--color-warm-gray)" }}>
+              Loading deals…
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {isEmpty && (
