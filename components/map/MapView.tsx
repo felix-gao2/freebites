@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createRoot } from "react-dom/client";
+import type { Root } from "react-dom/client";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import type { MapFilter } from "@/app/map/page";
@@ -146,8 +148,14 @@ export default function MapView({
   } | null>(null);
   const readyRef     = useRef(false);
 
-  const [pins, setPins]           = useState<RestaurantPin[]>([]);
-  const [selectedPin, setSelectedPin] = useState<RestaurantPin | null>(null);
+  const [pins, setPins] = useState<RestaurantPin[]>([]);
+  const [selectedFeature, setSelectedFeature] = useState<{
+    pin: RestaurantPin;
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const popupRef     = useRef<mapboxgl.Popup | null>(null);
+  const popupRootRef = useRef<Root | null>(null);
 
   pinsRef.current = pins;
 
@@ -258,9 +266,17 @@ export default function MapView({
       // Pin click → popup
       map.on("click", "unclustered-point", (e) => {
         const props = e.features?.[0]?.properties;
-        if (!props) return;
+        const geom  = e.features?.[0]?.geometry;
+        if (!props || !geom || geom.type !== "Point") return;
+        const [lng, lat] = (geom as { type: "Point"; coordinates: [number, number] }).coordinates;
         const pin = pinsRef.current.find((p) => p.id === props.restaurantId);
-        if (pin) setSelectedPin(pin);
+        if (pin) setSelectedFeature({ pin, lat, lng });
+      });
+
+      // Background click → close popup
+      map.on("click", (e) => {
+        const hits = map.queryRenderedFeatures(e.point, { layers: ["unclustered-point", "clusters"] });
+        if (!hits.length) setSelectedFeature(null);
       });
 
       map.on("mouseenter", "clusters",          () => { map.getCanvas().style.cursor = "pointer"; });
@@ -271,6 +287,10 @@ export default function MapView({
 
     return () => {
       readyRef.current = false;
+      popupRootRef.current?.unmount();
+      popupRootRef.current = null;
+      popupRef.current?.remove();
+      popupRef.current = null;
       map.remove();
       mapRef.current = null;
     };
@@ -291,6 +311,42 @@ export default function MapView({
     }
   }, [pins, filter, birthday]);
 
+  // Create / destroy the anchored Mapbox popup whenever selectedFeature changes
+  useEffect(() => {
+    popupRootRef.current?.unmount();
+    popupRootRef.current = null;
+    popupRef.current?.remove();
+    popupRef.current = null;
+
+    const map = mapRef.current;
+    if (!selectedFeature || !map) return;
+
+    const container = document.createElement("div");
+    const root = createRoot(container);
+    popupRootRef.current = root;
+    root.render(
+      <PinPopup
+        pin={selectedFeature.pin}
+        lat={selectedFeature.lat}
+        lng={selectedFeature.lng}
+        onClose={() => setSelectedFeature(null)}
+      />
+    );
+
+    const popup = new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+      className: "freebites-popup",
+      maxWidth: "300px",
+      offset: 18,
+    })
+      .setLngLat([selectedFeature.lng, selectedFeature.lat])
+      .setDOMContent(container)
+      .addTo(map);
+
+    popupRef.current = popup;
+  }, [selectedFeature]);
+
   return (
     <div className="relative w-full h-full">
       <div ref={containerRef} className="w-full h-full" />
@@ -301,10 +357,6 @@ export default function MapView({
             Add NEXT_PUBLIC_MAPBOX_TOKEN to .env to enable map
           </p>
         </div>
-      )}
-
-      {selectedPin && (
-        <PinPopup pin={selectedPin} onClose={() => setSelectedPin(null)} />
       )}
     </div>
   );
