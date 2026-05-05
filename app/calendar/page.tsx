@@ -4,8 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AnimatePresence } from "framer-motion";
-import { format, addMonths, subMonths, getMonth, getYear } from "date-fns";
-import { Map, Cake } from "lucide-react";
+import { format, addMonths, subMonths, getMonth, getYear, setMonth, setYear } from "date-fns";
+import { Map, Cake, CakeSlice } from "lucide-react";
 import { BIRTHDAY_KEY } from "@/components/BirthdayForm";
 import MonthView from "@/components/calendar/MonthView";
 import type { DealWithOccurrences } from "@/lib/deals";
@@ -44,6 +44,17 @@ export default function CalendarPage() {
   if (!birthday) return null;
 
   const todayLabel = format(new Date(), "EEEE, MMMM d");
+
+  // Parse birthday month (1-based) from stored "YYYY-MM-DD"
+  const bdayMonth = parseInt(birthday.split("-")[1], 10) - 1; // 0-based for date-fns
+  const now = new Date();
+  // Jump to this year's birthday month; if already past, go to next year's
+  const bdayTarget = bdayMonth < now.getMonth()
+    ? setMonth(setYear(now, now.getFullYear() + 1), bdayMonth)
+    : setMonth(now, bdayMonth);
+  const onBdayMonth =
+    getMonth(cursor) === bdayMonth &&
+    getYear(cursor) === getYear(bdayTarget);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -123,14 +134,26 @@ export default function CalendarPage() {
         <span className="font-semibold text-base" style={{ color: "var(--color-forest)" }}>
           {format(cursor, "MMMM yyyy")}
         </span>
-        <button
-          onClick={() => setCursor((c) => addMonths(c, 1))}
-          className="text-xl px-3 py-1 rounded-lg transition-colors hover:bg-[var(--muted)]"
-          style={{ color: "var(--color-forest)" }}
-          aria-label="next month"
-        >
-          ›
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setCursor((c) => addMonths(c, 1))}
+            className="text-xl px-3 py-1 rounded-lg transition-colors hover:bg-[var(--muted)]"
+            style={{ color: "var(--color-forest)" }}
+            aria-label="next month"
+          >
+            ›
+          </button>
+          <button
+            onClick={() => setCursor(bdayTarget)}
+            disabled={onBdayMonth}
+            className="p-1.5 rounded-lg transition-all duration-150 hover:bg-[var(--muted)] disabled:opacity-0 disabled:pointer-events-none"
+            style={{ color: "var(--color-terracotta)" }}
+            aria-label="Jump to birthday month"
+            title="Jump to your birthday month"
+          >
+            <CakeSlice size={16} strokeWidth={2} />
+          </button>
+        </div>
       </div>
 
       {/* ── calendar body ── */}
