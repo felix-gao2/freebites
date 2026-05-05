@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { format, addMonths, subMonths, getMonth, getYear } from "date-fns";
+import { Map, Cake } from "lucide-react";
 import { BIRTHDAY_KEY } from "@/components/BirthdayForm";
 import MonthView from "@/components/calendar/MonthView";
 import type { DealWithOccurrences } from "@/lib/deals";
@@ -41,45 +42,65 @@ export default function CalendarPage() {
 
   if (!birthday) return null;
 
+  const todayLabel = format(new Date(), "EEEE, MMMM d");
+
   return (
     <div className="flex flex-col min-h-screen">
 
       {/* ── navbar ── */}
       <header
-        className="flex items-center gap-4 px-6 py-4 border-b"
-        style={{ borderColor: "var(--border)", background: "var(--card)" }}
+        className="px-6 py-4 border-b shrink-0"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr auto 1fr",
+          alignItems: "center",
+          borderColor: "var(--border)",
+          background: "var(--card)",
+        }}
       >
-        {/* logo — resets to today */}
+        {/* left: logo — resets to today */}
         <button
           onClick={resetCalendar}
-          className="text-3xl font-black tracking-tighter leading-none shrink-0"
+          className="text-3xl font-black tracking-tighter leading-none justify-self-start"
         >
           <span style={{ color: "var(--color-terracotta)" }}>free</span>
           <span style={{ color: "var(--color-forest)" }}>bites</span>
         </button>
 
-        {/* tagline — center fill */}
-        <p className="flex-1 text-center text-sm" style={{ color: "var(--color-warm-gray)" }}>
-          Your free food calendar for the GTA
-        </p>
+        {/* center: tagline + subheader */}
+        <div className="flex flex-col items-center gap-0.5">
+          <p className="text-sm font-medium" style={{ color: "var(--color-warm-gray)" }}>
+            Your free food calendar for the GTA
+          </p>
+          <p className="text-xs" style={{ color: "var(--color-warm-gray)", opacity: 0.55 }}>
+            Today is {todayLabel}
+          </p>
+        </div>
 
-        {/* right actions */}
-        <div className="flex items-center gap-3 shrink-0">
+        {/* right: actions */}
+        <div className="flex items-center gap-2 justify-self-end">
           <Link
             href="/map"
-            className="rounded-full px-4 py-1.5 text-sm font-semibold border transition-colors"
+            className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold border transition-all duration-150 hover:bg-[var(--color-cream)]"
             style={{
-              borderColor: "var(--color-forest)",
-              color: "var(--color-forest)",
+              borderColor: "var(--color-terracotta)",
+              color: "var(--foreground)",
+              background: "transparent",
             }}
           >
-            Map view →
+            <Map size={14} strokeWidth={2} />
+            Map view
           </Link>
           <button
-            className="text-sm font-medium underline-offset-2 underline"
-            style={{ color: "var(--color-warm-gray)" }}
+            className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold border transition-all duration-150 hover:bg-[var(--color-cream)]"
+            style={{
+              borderColor: "var(--color-terracotta)",
+              color: "var(--foreground)",
+              background: "transparent",
+            }}
             onClick={() => { localStorage.removeItem(BIRTHDAY_KEY); router.push("/"); }}
           >
+            <Cake size={14} strokeWidth={2} />
             Change birthday
           </button>
         </div>

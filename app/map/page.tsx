@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { CalendarDays } from "lucide-react";
 import { BIRTHDAY_KEY } from "@/components/BirthdayForm";
 import MapView from "@/components/map/MapView";
 
@@ -69,19 +70,44 @@ export default function MapPage() {
     <div className="flex flex-col h-screen">
       {/* header */}
       <header
-        className="flex items-center justify-between px-5 py-4 border-b shrink-0"
-        style={{ borderColor: "var(--border)", background: "var(--card)" }}
+        className="px-5 py-4 border-b shrink-0"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr auto 1fr",
+          alignItems: "center",
+          borderColor: "var(--border)",
+          background: "var(--card)",
+        }}
       >
-        <span className="text-xl font-bold tracking-tight" style={{ color: "var(--color-terracotta)" }}>
-          freebites
-        </span>
+        {/* left: logo */}
         <Link
           href="/calendar"
-          className="text-sm font-medium"
-          style={{ color: "var(--color-forest)" }}
+          className="text-3xl font-black tracking-tighter leading-none justify-self-start"
         >
-          ← Calendar
+          <span style={{ color: "var(--color-terracotta)" }}>free</span>
+          <span style={{ color: "var(--color-forest)" }}>bites</span>
         </Link>
+
+        {/* center: tagline */}
+        <p className="text-sm font-medium" style={{ color: "var(--color-warm-gray)" }}>
+          Your free food calendar for the GTA
+        </p>
+
+        {/* right: calendar button */}
+        <div className="flex justify-end">
+          <Link
+            href="/calendar"
+            className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold border transition-all duration-150 hover:bg-[var(--color-cream)]"
+            style={{
+              borderColor: "var(--color-terracotta)",
+              color: "var(--foreground)",
+              background: "transparent",
+            }}
+          >
+            <CalendarDays size={14} strokeWidth={2} />
+            Calendar
+          </Link>
+        </div>
       </header>
 
       {/* filter bar — search left of chips on sm+, stacked on mobile */}
