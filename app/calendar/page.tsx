@@ -173,6 +173,7 @@ export default function CalendarPage() {
         {selectedDay && (
           <DayModal
             date={selectedDay}
+            birthday={birthday}
             deals={(() => {
               const y = getYear(selectedDay);
               const m = getMonth(selectedDay) + 1;

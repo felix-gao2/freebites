@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { format } from "date-fns";
+import { format, getMonth, getDate } from "date-fns";
 import { ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { DealWithOccurrences } from "@/lib/deals";
@@ -51,10 +51,12 @@ export default function DayModal({
   date,
   deals,
   onClose,
+  birthday,
 }: {
   date: Date;
   deals: DealWithOccurrences[];
   onClose: () => void;
+  birthday?: string;
 }) {
   const [tier, setTier]         = useState<TierFilter>("all");
   const [signup, setSignup]     = useState<SignupFilter>("all");
@@ -65,6 +67,11 @@ export default function DayModal({
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
+
+  const isBirthday = birthday
+    ? getMonth(date) + 1 === parseInt(birthday.split("-")[1], 10) &&
+      getDate(date) === parseInt(birthday.split("-")[2], 10)
+    : false;
 
   // Deals after tier + signup filters (used to compute category counts)
   const tierSignupFiltered = useMemo(() => deals.filter((d) => {
@@ -122,42 +129,97 @@ export default function DayModal({
         exit={{ y: "100%" }}
         transition={{ type: "spring", stiffness: 380, damping: 38, mass: 0.8 }}
       >
-        {/* handle */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full" style={{ background: "var(--border)" }} />
-        </div>
-
-        {/* header */}
-        <div
-          className="flex items-center justify-between px-5 py-3 border-b"
-          style={{ borderColor: "var(--border)" }}
-        >
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--color-warm-gray)" }}>
-              {format(date, "EEEE")}
-            </p>
-            <div className="flex items-baseline gap-2">
-              <h2 className="text-lg font-bold" style={{ color: "var(--color-forest)" }}>
-                {format(date, "MMMM d, yyyy")}
-              </h2>
-              {deals.length > 0 && (
-                <span className="text-sm" style={{ color: "var(--color-warm-gray)" }}>
-                  {filtersActive && filtered.length !== deals.length
-                    ? `${filtered.length} of ${deals.length} deals`
-                    : `${deals.length} deal${deals.length !== 1 ? "s" : ""}`}
-                </span>
-              )}
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-2xl leading-none px-1"
-            style={{ color: "var(--color-warm-gray)" }}
-            aria-label="close"
+        {isBirthday ? (
+          /* ── Birthday header ── */
+          <div
+            className="relative flex flex-col items-center text-center px-5 pt-4 pb-4 border-b shrink-0"
+            style={{
+              background: "linear-gradient(160deg, rgba(193,97,58,0.10) 0%, rgba(237,168,100,0.08) 100%)",
+              borderColor: "rgba(193,97,58,0.20)",
+            }}
           >
-            ×
-          </button>
-        </div>
+            {/* handle */}
+            <div className="w-10 h-1 rounded-full mb-3" style={{ background: "rgba(193,97,58,0.25)" }} />
+
+            <button
+              onClick={onClose}
+              className="absolute top-3 right-4 text-2xl leading-none px-1 opacity-50 hover:opacity-80 transition-opacity"
+              style={{ color: "var(--color-terracotta)" }}
+              aria-label="close"
+            >
+              ×
+            </button>
+
+            <motion.div
+              initial={{ scale: 0.7, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 320, damping: 22, delay: 0.1 }}
+              className="text-4xl mb-2 select-none"
+            >
+              🎂
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut", delay: 0.2 }}
+            >
+              <h2
+                className="text-xl font-black tracking-tight leading-none"
+                style={{ color: "var(--color-terracotta)" }}
+              >
+                Your birthday!
+              </h2>
+              <p className="text-sm mt-1" style={{ color: "var(--color-warm-gray)" }}>
+                {format(date, "MMMM d")}
+                {deals.length > 0 && (
+                  <> · <span style={{ color: "var(--color-terracotta)", fontWeight: 600 }}>
+                    {deals.length} free thing{deals.length !== 1 ? "s" : ""} for you
+                  </span></>
+                )}
+              </p>
+            </motion.div>
+          </div>
+        ) : (
+          /* ── Standard header ── */
+          <>
+            {/* handle */}
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 rounded-full" style={{ background: "var(--border)" }} />
+            </div>
+
+            <div
+              className="flex items-center justify-between px-5 py-3 border-b"
+              style={{ borderColor: "var(--border)" }}
+            >
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--color-warm-gray)" }}>
+                  {format(date, "EEEE")}
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <h2 className="text-lg font-bold" style={{ color: "var(--color-forest)" }}>
+                    {format(date, "MMMM d, yyyy")}
+                  </h2>
+                  {deals.length > 0 && (
+                    <span className="text-sm" style={{ color: "var(--color-warm-gray)" }}>
+                      {filtersActive && filtered.length !== deals.length
+                        ? `${filtered.length} of ${deals.length} deals`
+                        : `${deals.length} deal${deals.length !== 1 ? "s" : ""}`}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={onClose}
+                className="text-2xl leading-none px-1"
+                style={{ color: "var(--color-warm-gray)" }}
+                aria-label="close"
+              >
+                ×
+              </button>
+            </div>
+          </>
+        )}
 
         {/* filter row */}
         <div
