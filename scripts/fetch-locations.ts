@@ -10,7 +10,9 @@ import * as path from "path";
 // GTA bounding box: south, west, north, east
 const BBOX = "43.4,-80.0,43.95,-79.0";
 const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
-const DELAY_MS = 1000;
+const DELAY_MS = 3000;
+const RATE_LIMIT_WAIT_MS = 30_000;
+const MAX_ATTEMPTS = 3;
 const OUT_PATH = path.join(__dirname, "../prisma/locations.json");
 
 type Location = {
@@ -38,21 +40,35 @@ async function queryOverpass(name: string, tag: "brand" | "name"): Promise<Locat
 );
 out center;`;
 
-  const resp = await fetch(OVERPASS_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      "User-Agent": "freebites-location-fetcher/1.0 (github.com/freebites)",
-      "Accept": "*/*",
-    },
-    body: `data=${encodeURIComponent(query)}`,
-  });
+  let resp: Response | undefined;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    resp = await fetch(OVERPASS_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent": "freebites-location-fetcher/1.0 (github.com/freebites)",
+        "Accept": "*/*",
+      },
+      body: `data=${encodeURIComponent(query)}`,
+    });
 
-  if (!resp.ok) {
-    throw new Error(`Overpass returned HTTP ${resp.status} for "${name}" [${tag}]`);
+    if (resp.status === 429) {
+      if (attempt < MAX_ATTEMPTS) {
+        process.stdout.write(`\n  429 rate-limited, waiting 30s (attempt ${attempt}/${MAX_ATTEMPTS}) ... `);
+        await sleep(RATE_LIMIT_WAIT_MS);
+        continue;
+      }
+      throw new Error(`Overpass returned HTTP 429 for "${name}" [${tag}] after ${MAX_ATTEMPTS} attempts`);
+    }
+
+    if (!resp.ok) {
+      throw new Error(`Overpass returned HTTP ${resp.status} for "${name}" [${tag}]`);
+    }
+
+    break;
   }
 
-  const data = (await resp.json()) as { elements: OverpassElement[] };
+  const data = (await resp!.json()) as { elements: OverpassElement[] };
 
   return data.elements.flatMap((el) => {
     const lat = el.lat ?? el.center?.lat;
