@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { AnimatePresence } from "framer-motion";
 import { format, addMonths, subMonths, getMonth, getYear } from "date-fns";
 import { Map, Cake } from "lucide-react";
 import { BIRTHDAY_KEY } from "@/components/BirthdayForm";
@@ -144,19 +145,21 @@ export default function CalendarPage() {
       </div>
 
       {/* ── day modal ── */}
-      {selectedDay && (
-        <DayModal
-          date={selectedDay}
-          deals={(() => {
-            const y = getYear(selectedDay);
-            const m = getMonth(selectedDay) + 1;
-            const d = selectedDay.getDate();
-            const key = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-            return dayMap[key] ?? [];
-          })()}
-          onClose={() => setSelectedDay(null)}
-        />
-      )}
+      <AnimatePresence>
+        {selectedDay && (
+          <DayModal
+            date={selectedDay}
+            deals={(() => {
+              const y = getYear(selectedDay);
+              const m = getMonth(selectedDay) + 1;
+              const d = selectedDay.getDate();
+              const key = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+              return dayMap[key] ?? [];
+            })()}
+            onClose={() => setSelectedDay(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

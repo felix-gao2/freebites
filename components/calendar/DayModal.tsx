@@ -163,8 +163,8 @@ export default function DayModal({
         >
           {/* Tier */}
           <Chip label="All"                active={tier === "all" && category === "all" && signup === "all"} onClick={() => { setTier("all"); setCategory("all"); setSignup("all"); }} />
-          <Chip label="Truly Free"         active={tier === "truly_free"}    onClick={() => setTier("truly_free")} />
-          <Chip label="Free with Purchase" active={tier === "with_purchase"} onClick={() => setTier("with_purchase")} />
+          <Chip label="Truly Free"         active={tier === "truly_free"}    onClick={() => setTier(tier === "truly_free"    ? "all" : "truly_free")} />
+          <Chip label="Free with Purchase" active={tier === "with_purchase"} onClick={() => setTier(tier === "with_purchase" ? "all" : "with_purchase")} />
 
           <Sep />
 
@@ -227,7 +227,7 @@ export default function DayModal({
             </motion.div>
           </AnimatePresence>
         </div>
-      </div>
+      </motion.div>
     </>
   );
 }
