@@ -287,10 +287,6 @@ export default function MapView({
 
     return () => {
       readyRef.current = false;
-      popupRootRef.current?.unmount();
-      popupRootRef.current = null;
-      popupRef.current?.remove();
-      popupRef.current = null;
       map.remove();
       mapRef.current = null;
     };
@@ -313,11 +309,6 @@ export default function MapView({
 
   // Create / destroy the anchored Mapbox popup whenever selectedFeature changes
   useEffect(() => {
-    popupRootRef.current?.unmount();
-    popupRootRef.current = null;
-    popupRef.current?.remove();
-    popupRef.current = null;
-
     const map = mapRef.current;
     if (!selectedFeature || !map) return;
 
@@ -345,6 +336,14 @@ export default function MapView({
       .addTo(map);
 
     popupRef.current = popup;
+
+    return () => {
+      popup.remove();
+      popupRef.current = null;
+      popupRootRef.current = null;
+      // Defer unmount so it doesn't fire mid-render when onClose triggers a state update
+      setTimeout(() => root.unmount(), 0);
+    };
   }, [selectedFeature]);
 
   return (
