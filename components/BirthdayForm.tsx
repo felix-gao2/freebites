@@ -121,7 +121,7 @@ export default function BirthdayForm({ onDatePick }: BirthdayFormProps) {
               transition: "border-color 150ms ease, box-shadow 150ms ease",
             }}
           >
-            {selectedDate ? format(selectedDate, "MMMM d, yyyy") : "Enter your birthday"}
+            {selectedDate ? format(selectedDate, "MMMM d") : "Enter your birthday"}
           </motion.button>
         </div>
 
