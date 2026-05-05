@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { format } from "date-fns";
+import { ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { DealWithOccurrences } from "@/lib/deals";
 
@@ -262,26 +263,38 @@ function Sep() {
 }
 
 function DealCard({ deal }: { deal: DealWithOccurrences }) {
-  const inner = (
+  const hasLink = !!deal.restaurant.website;
+
+  const content = (
     <>
-      {/* type + tier + signup row */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-base">{TYPE_EMOJI[deal.dealType] ?? "🍔"}</span>
-        <span
-          className="text-[10px] font-semibold uppercase tracking-wide rounded-full px-2 py-0.5"
-          style={{
-            background: deal.tier === 1 ? "var(--color-forest)" : "var(--muted)",
-            color:      deal.tier === 1 ? "var(--color-cream)"  : "var(--color-warm-gray)",
-          }}
-        >
-          {TIER_LABEL[deal.tier] ?? "Deal"}
-        </span>
-        <span
-          className="text-[10px] font-medium rounded-full px-2 py-0.5"
-          style={{ background: "var(--muted)", color: "var(--color-warm-gray)" }}
-        >
-          {SIGNUP_TYPE_LABEL[deal.signupType] ?? deal.signupType}
-        </span>
+      {/* badges row + optional link icon */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-base">{TYPE_EMOJI[deal.dealType] ?? "🍔"}</span>
+          <span
+            className="text-[10px] font-semibold uppercase tracking-wide rounded-full px-2 py-0.5"
+            style={{
+              background: deal.tier === 1 ? "var(--color-forest)" : "var(--muted)",
+              color:      deal.tier === 1 ? "var(--color-cream)"  : "var(--color-warm-gray)",
+            }}
+          >
+            {TIER_LABEL[deal.tier] ?? "Deal"}
+          </span>
+          <span
+            className="text-[10px] font-medium rounded-full px-2 py-0.5"
+            style={{ background: "var(--muted)", color: "var(--color-warm-gray)" }}
+          >
+            {SIGNUP_TYPE_LABEL[deal.signupType] ?? deal.signupType}
+          </span>
+        </div>
+        {hasLink && (
+          <ExternalLink
+            size={13}
+            strokeWidth={2}
+            className="shrink-0 mt-0.5 opacity-25 transition-opacity duration-150 group-hover:opacity-60"
+            style={{ color: "var(--color-terracotta)" }}
+          />
+        )}
       </div>
 
       {/* restaurant */}
@@ -308,26 +321,26 @@ function DealCard({ deal }: { deal: DealWithOccurrences }) {
     </>
   );
 
-  const sharedClass = "rounded-xl border px-3.5 py-2.5 flex flex-col gap-1 transition-colors duration-150";
+  const base = "rounded-xl border px-3.5 py-2.5 flex flex-col gap-1 transition-all duration-150";
   const sharedStyle = { borderColor: "var(--border)", background: "var(--background)" };
 
-  if (deal.restaurant.website) {
+  if (hasLink) {
     return (
       <a
-        href={deal.restaurant.website}
+        href={deal.restaurant.website!}
         target="_blank"
         rel="noopener noreferrer"
-        className={sharedClass + " hover:bg-[oklch(0.96_0.01_60)] cursor-pointer"}
+        className={base + " group hover:bg-[var(--color-cream)] hover:border-[var(--color-terracotta-light)]"}
         style={sharedStyle}
       >
-        {inner}
+        {content}
       </a>
     );
   }
 
   return (
-    <div className={sharedClass} style={sharedStyle}>
-      {inner}
+    <div className={base} style={sharedStyle}>
+      {content}
     </div>
   );
 }
