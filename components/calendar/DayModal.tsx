@@ -370,7 +370,10 @@ function DealCard({ deal }: { deal: DealWithOccurrences }) {
       </p>
 
       {/* description */}
-      <p className="text-xs leading-relaxed" style={{ color: "var(--color-warm-gray)" }}>
+      <p
+        className="text-xs leading-relaxed line-clamp-3"
+        style={{ color: "var(--color-warm-gray)" }}
+      >
         {deal.description}
       </p>
 
