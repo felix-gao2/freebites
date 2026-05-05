@@ -30,7 +30,7 @@ export default function PinPopup({
   const deal = pin.deals.find((d) => d.marquee) ?? pin.deals[0];
   const tier = TIER_CONFIG[deal?.tier ?? 1] ?? TIER_CONFIG[1];
   const signupLabel = SIGNUP_LABEL[deal?.signupType ?? "no_signup"] ?? "No signup";
-  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(pin.name + ", Toronto, ON")}`;
 
   return (
     <div style={{ fontFamily: "inherit", minWidth: 220, maxWidth: 280, background: "#fff" }}>
