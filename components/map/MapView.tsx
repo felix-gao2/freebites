@@ -114,9 +114,12 @@ function fitToPins(map: mapboxgl.Map, pins: RestaurantPin[], isAll: boolean) {
 }
 
 function applyFilters(pins: RestaurantPin[], filter: MapFilter) {
-  const { tier, signup, category } = filter;
-  const isAll = tier === "all" && signup === "all" && category === "all";
-  const filtered = isAll
+  const { tier, signup, category, search } = filter;
+  const searchTerm = search.trim().toLowerCase();
+  const chipsAreAll = tier === "all" && signup === "all" && category === "all";
+  const isAll = chipsAreAll && !searchTerm;
+
+  let filtered = chipsAreAll
     ? pins
     : pins.filter((pin) => {
         if (category !== "all" && pin.category !== category) return false;
@@ -127,6 +130,11 @@ function applyFilters(pins: RestaurantPin[], filter: MapFilter) {
           return true;
         });
       });
+
+  if (searchTerm) {
+    filtered = filtered.filter((pin) => pin.name.toLowerCase().includes(searchTerm));
+  }
+
   return { filtered, isAll };
 }
 
