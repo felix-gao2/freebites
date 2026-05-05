@@ -13,6 +13,7 @@ const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
 const DELAY_MS = 3000;
 const RATE_LIMIT_WAIT_MS = 30_000;
 const MAX_ATTEMPTS = 3;
+const MAX_LOCATIONS = 50;
 const OUT_PATH = path.join(__dirname, "../prisma/locations.json");
 
 type Location = {
@@ -93,6 +94,35 @@ function sleep(ms: number) {
   return new Promise<void>((r) => setTimeout(r, ms));
 }
 
+// Mulberry32 PRNG — returns a function that yields floats in [0, 1)
+function mulberry32(seed: number): () => number {
+  return () => {
+    seed |= 0; seed = seed + 0x6d2b79f5 | 0;
+    let z = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    z = z + Math.imul(z ^ z >>> 7, 61 | z) ^ z;
+    return ((z ^ z >>> 14) >>> 0) / 0x100000000;
+  };
+}
+
+// djb2 hash of a string → 32-bit unsigned int
+function hashStr(s: string): number {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = (Math.imul(h, 33) ^ s.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+// Deterministic partial Fisher-Yates: pick `n` items from `arr` seeded by `seed`
+function seededSample<T>(arr: T[], n: number, seed: number): T[] {
+  if (arr.length <= n) return arr;
+  const a = arr.slice();
+  const rand = mulberry32(seed);
+  for (let i = 0; i < n; i++) {
+    const j = i + Math.floor(rand() * (a.length - i));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a.slice(0, n);
+}
+
 function normalizeName(name: string): string {
   return name.replace(/\s+(Canada|Canadian)\s*$/i, "").trim();
 }
@@ -163,9 +193,15 @@ async function main() {
       console.error(`\n  ERROR: ${(err as Error).message}`);
     }
 
+    const raw = locations.length;
+    if (locations.length > MAX_LOCATIONS) {
+      locations = seededSample(locations, MAX_LOCATIONS, hashStr(name));
+    }
+
     const label = hasAlt ? `${name} → tried "${normalized}"` : name;
+    const sampledNote = raw > MAX_LOCATIONS ? ` (sampled ${MAX_LOCATIONS}/${raw})` : "";
     console.log(
-      `${locations.length} location${locations.length !== 1 ? "s" : ""} found  [${label}]`
+      `${locations.length} location${locations.length !== 1 ? "s" : ""} found${sampledNote}  [${label}]`
     );
     results[id] = locations;
 
