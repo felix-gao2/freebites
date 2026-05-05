@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import type { Root } from "react-dom/client";
+import { AnimatePresence, motion } from "framer-motion";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import type { MapFilter } from "@/app/map/page";
@@ -141,9 +142,11 @@ function applyFilters(pins: RestaurantPin[], filter: MapFilter) {
 export default function MapView({
   birthday,
   filter,
+  onClearFilters,
 }: {
   birthday: string;
   filter: MapFilter;
+  onClearFilters: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef       = useRef<mapboxgl.Map | null>(null);
@@ -156,7 +159,8 @@ export default function MapView({
   } | null>(null);
   const readyRef     = useRef(false);
 
-  const [pins, setPins] = useState<RestaurantPin[]>([]);
+  const [pins, setPins]       = useState<RestaurantPin[]>([]);
+  const [isEmpty, setIsEmpty] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState<{
     pin: RestaurantPin;
     lat: number;
@@ -306,6 +310,7 @@ export default function MapView({
     if (!map || pins.length === 0) return;
 
     const { filtered, isAll } = applyFilters(pins, filter);
+    setIsEmpty(filtered.length === 0);
     const geojson = toGeoJSON(filtered);
     pendingRef.current = { geojson, filtered, isAll };
 
@@ -357,6 +362,45 @@ export default function MapView({
   return (
     <div className="relative w-full h-full">
       <div ref={containerRef} className="w-full h-full" />
+
+      <AnimatePresence>
+        {isEmpty && (
+          <motion.div
+            key="empty-state"
+            initial={{ opacity: 0, scale: 0.95, y: 6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 6 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          >
+            <div
+              className="pointer-events-auto flex flex-col items-center gap-3 rounded-2xl px-7 py-5 text-center"
+              style={{
+                background: "var(--card)",
+                border: "1px solid var(--border)",
+                boxShadow: "0 4px 24px rgba(0,0,0,0.10)",
+              }}
+            >
+              <span
+                className="text-sm font-medium"
+                style={{ color: "var(--color-warm-gray)" }}
+              >
+                No deals match these filters
+              </span>
+              <button
+                onClick={onClearFilters}
+                className="text-sm font-semibold rounded-full px-5 py-1.5 transition-opacity hover:opacity-80"
+                style={{
+                  background: "var(--color-terracotta)",
+                  color: "var(--color-cream)",
+                }}
+              >
+                Clear filters
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {!process.env.NEXT_PUBLIC_MAPBOX_TOKEN && (
         <div className="absolute inset-0 flex items-center justify-center" style={{ background: "var(--muted)" }}>

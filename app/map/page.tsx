@@ -60,6 +60,7 @@ export default function MapPage() {
     setTier("all");
     setSignup("all");
     setCategory("all");
+    setSearchRaw("");
   }
 
   const filter: MapFilter = { tier, signup, category, search };
@@ -125,7 +126,7 @@ export default function MapPage() {
 
       {/* map fills remaining space */}
       <div className="flex-1 relative">
-        <MapView birthday={birthday} filter={filter} />
+        <MapView birthday={birthday} filter={filter} onClearFilters={resetAll} />
       </div>
     </div>
   );
