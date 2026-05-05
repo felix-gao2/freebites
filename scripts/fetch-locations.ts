@@ -40,7 +40,11 @@ out center;`;
 
   const resp = await fetch(OVERPASS_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "User-Agent": "freebites-location-fetcher/1.0 (github.com/freebites)",
+      "Accept": "*/*",
+    },
     body: `data=${encodeURIComponent(query)}`,
   });
 
@@ -73,6 +77,19 @@ function sleep(ms: number) {
   return new Promise<void>((r) => setTimeout(r, ms));
 }
 
+function normalizeName(name: string): string {
+  return name.replace(/\s+(Canada|Canadian)\s*$/i, "").trim();
+}
+
+function loadExisting(): Record<string, Location[]> {
+  if (!fs.existsSync(OUT_PATH)) return {};
+  try {
+    return JSON.parse(fs.readFileSync(OUT_PATH, "utf-8"));
+  } catch {
+    return {};
+  }
+}
+
 async function main() {
   const pool = new Pool({ connectionString: process.env.DATABASE_URL });
   const adapter = new PrismaPg(pool);
@@ -83,33 +100,60 @@ async function main() {
     orderBy: { name: "asc" },
   });
 
-  console.log(`Fetching locations for ${restaurants.length} restaurants...\n`);
+  const existing = loadExisting();
 
-  const results: Record<string, Location[]> = {};
+  // Only retry restaurants that have 0 results (or are missing from existing data)
+  const toFetch = restaurants.filter(
+    (r) => !existing[r.id] || existing[r.id].length === 0
+  );
 
-  for (let i = 0; i < restaurants.length; i++) {
-    const { id, name } = restaurants[i];
-    process.stdout.write(`[${i + 1}/${restaurants.length}] ${name} ... `);
+  console.log(
+    `${restaurants.length} total restaurants; ${restaurants.length - toFetch.length} already have results. Fetching ${toFetch.length} with 0 results...\n`
+  );
+
+  const results: Record<string, Location[]> = { ...existing };
+
+  for (let i = 0; i < toFetch.length; i++) {
+    const { id, name } = toFetch[i];
+    const normalized = normalizeName(name);
+    const hasAlt = normalized !== name;
+
+    process.stdout.write(`[${i + 1}/${toFetch.length}] ${name} ... `);
 
     let locations: Location[] = [];
 
     try {
+      // 1. brand= with original name
       locations = await queryOverpass(name, "brand");
 
-      // Fallback to name= if brand= returns nothing
+      // 2. brand= with normalized name (e.g. strip "Canada")
+      if (locations.length === 0 && hasAlt) {
+        await sleep(DELAY_MS);
+        locations = await queryOverpass(normalized, "brand");
+      }
+
+      // 3. name= with original name
       if (locations.length === 0) {
         await sleep(DELAY_MS);
         locations = await queryOverpass(name, "name");
+      }
+
+      // 4. name= with normalized name
+      if (locations.length === 0 && hasAlt) {
+        await sleep(DELAY_MS);
+        locations = await queryOverpass(normalized, "name");
       }
     } catch (err) {
       console.error(`\n  ERROR: ${(err as Error).message}`);
     }
 
-    console.log(`${locations.length} location${locations.length !== 1 ? "s" : ""} found`);
+    const label = hasAlt ? `${name} → tried "${normalized}"` : name;
+    console.log(
+      `${locations.length} location${locations.length !== 1 ? "s" : ""} found  [${label}]`
+    );
     results[id] = locations;
 
-    // Polite delay between restaurants (skip after last)
-    if (i < restaurants.length - 1) {
+    if (i < toFetch.length - 1) {
       await sleep(DELAY_MS);
     }
   }
