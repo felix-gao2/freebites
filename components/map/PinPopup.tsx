@@ -90,6 +90,19 @@ export default function PinPopup({
         </div>
       )}
 
+      {/* Extra deals count */}
+      {pin.deals.length > 1 && (
+        <div style={{ padding: "0 14px 10px" }}>
+          <span style={{
+            fontSize: 11, fontWeight: 600, color: "#C1613A",
+            background: "#FFF0E8", borderRadius: 20, padding: "2px 8px",
+            display: "inline-block",
+          }}>
+            +{pin.deals.length - 1} more deal{pin.deals.length - 1 !== 1 ? "s" : ""} here
+          </span>
+        </div>
+      )}
+
       {/* Directions */}
       <div style={{ borderTop: "1px solid #E8D5C4", padding: "9px 14px" }}>
         <a
