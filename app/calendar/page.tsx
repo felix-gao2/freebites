@@ -125,7 +125,8 @@ export default function CalendarPage() {
       >
         <button
           onClick={() => setCursor((c) => subMonths(c, 1))}
-          className="text-xl px-3 py-1 rounded-lg transition-colors hover:bg-[var(--muted)]"
+          disabled={getMonth(cursor) === getMonth(now) && getYear(cursor) === getYear(now)}
+          className="text-xl px-3 py-1 rounded-lg transition-colors hover:bg-[var(--muted)] disabled:opacity-25 disabled:pointer-events-none"
           style={{ color: "var(--color-forest)" }}
           aria-label="previous month"
         >
