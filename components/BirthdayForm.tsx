@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { DayPicker } from "react-day-picker";
 import { format } from "date-fns";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const BIRTHDAY_KEY = "freebites_birthday";
 
@@ -24,6 +24,7 @@ export default function BirthdayForm({ onDatePick }: BirthdayFormProps) {
   const [mounted, setMounted] = useState(false);
   const [arrowHover, setArrowHover] = useState(false);
   const [triggerFocused, setTriggerFocused] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
@@ -74,7 +75,8 @@ export default function BirthdayForm({ onDatePick }: BirthdayFormProps) {
     if (!selectedDate) return;
     if (selectedDate > new Date()) return;
     localStorage.setItem(BIRTHDAY_KEY, format(selectedDate, "yyyy-MM-dd"));
-    router.push("/calendar");
+    setSubmitted(true);
+    setTimeout(() => router.push("/calendar"), 900);
   };
 
   const today = new Date();
@@ -128,30 +130,62 @@ export default function BirthdayForm({ onDatePick }: BirthdayFormProps) {
         {/* Submit button */}
         <motion.button
           type="submit"
-          disabled={!selectedDate}
+          disabled={!selectedDate || submitted}
           onHoverStart={() => setArrowHover(true)}
           onHoverEnd={() => setArrowHover(false)}
-          whileHover={selectedDate ? {
+          whileHover={selectedDate && !submitted ? {
             scale: 1.02,
             boxShadow: "0 8px 28px rgba(193,97,58,0.38), 0 2px 8px rgba(0,0,0,0.08)",
           } : {}}
-          whileTap={selectedDate ? { scale: 0.98 } : {}}
-          transition={{ duration: 0.15, ease: OUT }}
-          className="w-full rounded-2xl px-5 py-4 text-lg font-bold flex items-center justify-center gap-1.5"
+          whileTap={selectedDate && !submitted ? { scale: 0.98 } : {}}
+          animate={{
+            background: submitted
+              ? "var(--color-forest)"
+              : selectedDate
+              ? "var(--color-terracotta)"
+              : "rgba(193,97,58,0.38)",
+          }}
+          transition={{ duration: 0.25, ease: OUT }}
+          className="w-full rounded-2xl px-5 py-4 text-lg font-bold flex items-center justify-center gap-2"
           style={{
-            background: selectedDate ? "var(--color-terracotta)" : "rgba(193,97,58,0.38)",
             color: "var(--color-cream)",
             boxShadow: selectedDate ? "0 4px 14px rgba(193,97,58,0.28)" : "none",
-            cursor: selectedDate ? "pointer" : "not-allowed",
+            cursor: submitted ? "default" : selectedDate ? "pointer" : "not-allowed",
           }}
         >
-          <span>Show me the free food</span>
-          <motion.span
-            animate={{ x: arrowHover && selectedDate ? 4 : 0 }}
-            transition={{ duration: 0.15, ease: OUT }}
-          >
-            →
-          </motion.span>
+          <AnimatePresence mode="wait" initial={false}>
+            {submitted ? (
+              <motion.span
+                key="done"
+                className="flex items-center gap-2"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+                Let&apos;s go!
+              </motion.span>
+            ) : (
+              <motion.span
+                key="idle"
+                className="flex items-center gap-1.5"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <span>Show me the free food</span>
+                <motion.span
+                  animate={{ x: arrowHover && selectedDate ? 4 : 0 }}
+                  transition={{ duration: 0.15, ease: OUT }}
+                >
+                  →
+                </motion.span>
+              </motion.span>
+            )}
+          </AnimatePresence>
         </motion.button>
       </form>
 
