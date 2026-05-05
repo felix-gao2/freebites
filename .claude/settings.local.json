@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(npx prisma *)",
+      "Bash(git commit *)",
+      "Bash(npm install *)",
+      "Bash(npx tsx *)",
+      "Bash(node -e ' *)",
+      "Bash(node -e \"require\\('dotenv'\\).config\\(\\); process.stdout.write\\(process.env.DATABASE_URL || ''\\)\")",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(d.get\\('exports', {}\\).get\\('./style.css', 'not found'\\)\\); print\\(d.get\\('style', 'no style field'\\)\\)\")",
+      "Bash(npm test *)",
+      "Bash(npx ts-node *)",
+      "Bash(npx next *)",
+      "Bash(curl -s http://localhost:3000/api/restaurants)",
+      "Bash(curl -v http://localhost:3000/api/restaurants)",
+      "Bash(curl -s http://localhost:3001/api/restaurants)",
+      "Bash(Get-Content *)",
+      "Bash(taskkill /PID 16816 /F)",
+      "Bash(curl -v \"http://localhost:3000/api/restaurants\")",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(curl -s \"http://localhost:3000/api/restaurants\")"
+    ]
+  }
+}

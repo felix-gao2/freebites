@@ -155,3 +155,16 @@
 .rdp-button_next:hover { background-color: var(--color-cream-dark); }
 /* Weekday headers */
 .rdp-weekday { color: var(--color-warm-gray); }
+
+/* ── Mapbox pin popup ─────────────────────────────────────────── */
+.freebites-popup .mapboxgl-popup-content {
+  padding: 0;
+  border-radius: 14px;
+  box-shadow: 0 4px 24px rgba(44, 74, 62, 0.15);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.freebites-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip { border-top-color: #fff; }
+.freebites-popup.mapboxgl-popup-anchor-top    .mapboxgl-popup-tip { border-bottom-color: #fff; }
+.freebites-popup.mapboxgl-popup-anchor-left   .mapboxgl-popup-tip { border-right-color: #fff; }
+.freebites-popup.mapboxgl-popup-anchor-right  .mapboxgl-popup-tip { border-left-color: #fff; }
