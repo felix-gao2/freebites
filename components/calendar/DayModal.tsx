@@ -378,7 +378,7 @@ function DealCard({ deal }: { deal: DealWithOccurrences }) {
 
       {/* description */}
       <p
-        className="text-xs leading-relaxed line-clamp-3"
+        className="text-sm leading-relaxed line-clamp-3"
         style={{ color: "var(--color-warm-gray)" }}
       >
         {deal.description}
@@ -386,7 +386,7 @@ function DealCard({ deal }: { deal: DealWithOccurrences }) {
 
       {/* terms */}
       {deal.terms && (
-        <p className="text-[10px] italic leading-relaxed opacity-60" style={{ color: "var(--color-warm-gray)" }}>
+        <p className="text-xs italic leading-relaxed opacity-60" style={{ color: "var(--color-warm-gray)" }}>
           {deal.terms}
         </p>
       )}
