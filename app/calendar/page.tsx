@@ -82,10 +82,10 @@ export default function CalendarPage() {
 
         {/* center: tagline + subheader */}
         <div className="flex flex-col items-center gap-0.5">
-          <p className="text-sm font-medium" style={{ color: "var(--color-warm-gray)" }}>
+          <p className="text-base font-medium" style={{ color: "var(--color-warm-gray)" }}>
             Your free food calendar for the GTA
           </p>
-          <p className="text-xs" style={{ color: "var(--color-warm-gray)", opacity: 0.55 }}>
+          <p className="text-sm" style={{ color: "var(--color-warm-gray)", opacity: 0.55 }}>
             Today is {todayLabel}
           </p>
         </div>
