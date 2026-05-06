@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Cake } from "lucide-react";
 import { BIRTHDAY_KEY } from "@/components/BirthdayForm";
 import MapView from "@/components/map/MapView";
 
@@ -93,8 +93,8 @@ export default function MapPage() {
           Your free food calendar for the GTA
         </p>
 
-        {/* right: calendar button */}
-        <div className="flex justify-end">
+        {/* right: actions */}
+        <div className="flex items-center gap-2 justify-end">
           <Link
             href="/calendar"
             className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold border transition-all duration-150 hover:bg-[var(--color-cream)]"
@@ -107,6 +107,18 @@ export default function MapPage() {
             <CalendarDays size={14} strokeWidth={2} />
             Calendar
           </Link>
+          <button
+            className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold border transition-all duration-150 hover:bg-[var(--color-cream)]"
+            style={{
+              borderColor: "var(--color-terracotta)",
+              color: "var(--foreground)",
+              background: "transparent",
+            }}
+            onClick={() => { localStorage.removeItem(BIRTHDAY_KEY); router.push("/"); }}
+          >
+            <Cake size={14} strokeWidth={2} />
+            Change birthday
+          </button>
         </div>
       </header>
 
