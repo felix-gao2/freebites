@@ -62,11 +62,8 @@ export default function CalendarPage() {
 
       {/* ── navbar ── */}
       <header
-        className="px-6 py-4 border-b shrink-0"
+        className="px-6 py-4 border-b shrink-0 flex items-center justify-between"
         style={{
-          display: "grid",
-          gridTemplateColumns: "1fr auto 1fr",
-          alignItems: "center",
           borderColor: "var(--border)",
           background: "var(--card)",
         }}
@@ -74,24 +71,14 @@ export default function CalendarPage() {
         {/* left: logo — resets to today */}
         <button
           onClick={resetCalendar}
-          className="text-3xl font-black tracking-tighter leading-none justify-self-start"
+          className="text-3xl font-black tracking-tighter leading-none"
         >
           <span style={{ color: "var(--color-terracotta)" }}>free</span>
           <span style={{ color: "var(--color-forest)" }}>bites</span>
         </button>
 
-        {/* center: tagline + subheader */}
-        <div className="flex flex-col items-center gap-0.5">
-          <p className="text-base font-medium" style={{ color: "var(--color-warm-gray)" }}>
-            Your free food calendar for the GTA
-          </p>
-          <p className="text-sm" style={{ color: "var(--color-warm-gray)", opacity: 0.55 }}>
-            Today is {todayLabel}
-          </p>
-        </div>
-
         {/* right: actions */}
-        <div className="flex items-center gap-2 justify-self-end">
+        <div className="flex items-center gap-2">
           <Link
             href="/map"
             className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold border transition-all duration-150 hover:bg-[var(--color-cream)]"
@@ -133,9 +120,17 @@ export default function CalendarPage() {
         >
           ‹
         </button>
-        <span className="font-semibold text-base" style={{ color: "var(--color-forest)" }}>
-          {format(cursor, "MMMM yyyy")}
-        </span>
+        <div className="flex flex-col items-center gap-0.5">
+          <span className="font-semibold text-base" style={{ color: "var(--color-forest)" }}>
+            {format(cursor, "MMMM yyyy")}
+          </span>
+          <p className="text-base font-medium" style={{ color: "var(--color-warm-gray)" }}>
+            Your free food calendar for the GTA
+          </p>
+          <p className="text-sm" style={{ color: "var(--color-warm-gray)", opacity: 0.55 }}>
+            Today is {todayLabel}
+          </p>
+        </div>
         <div className="flex items-center gap-1">
           <button
             onClick={() => { directionRef.current = 1; setCursor((c) => addMonths(c, 1)); }}
