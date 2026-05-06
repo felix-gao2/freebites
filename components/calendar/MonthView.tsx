@@ -9,6 +9,8 @@ import {
   eachDayOfInterval,
   isSameMonth,
   isToday,
+  isBefore,
+  startOfDay,
   format,
   getMonth,
   getDate,
@@ -66,6 +68,7 @@ export default function MonthView({
 
           const key = `${getYear(day)}-${String(getMonth(day) + 1).padStart(2, "0")}-${String(getDate(day)).padStart(2, "0")}`;
           const deals = dayMap[key] ?? [];
+          const isPastDay = inMonth && !today && isBefore(day, startOfDay(new Date()));
 
           return (
             <DayCell
@@ -74,6 +77,7 @@ export default function MonthView({
               inMonth={inMonth}
               today={today}
               isBirthday={isBirthday}
+              isPastDay={isPastDay}
               deals={deals}
               skeleton={isFirstLoad && inMonth}
               onClick={() => onDayClick?.(day)}
@@ -97,6 +101,7 @@ function DayCell({
   inMonth,
   today,
   isBirthday,
+  isPastDay,
   deals,
   skeleton,
   onClick,
@@ -105,6 +110,7 @@ function DayCell({
   inMonth: boolean;
   today: boolean;
   isBirthday: boolean;
+  isPastDay: boolean;
   deals: DealWithOccurrences[];
   skeleton?: boolean;
   onClick: () => void;
@@ -113,23 +119,26 @@ function DayCell({
   const label = format(day, "d");
   const hasDeals = deals.length > 0;
   const isEmptyInMonth = inMonth && !hasDeals && !skeleton;
+  const interactive = hasDeals && inMonth && !isPastDay;
 
   let bg = "var(--card)";
   if (isBirthday) bg = "oklch(0.97 0.05 50)";
   if (!inMonth) bg = "var(--muted)";
-  if (hovered && hasDeals && inMonth) bg = "var(--color-cream-dark)";
+  if (isPastDay) bg = "var(--muted)";
+  if (hovered && interactive) bg = "var(--color-cream-dark)";
 
   return (
     <button
-      onClick={hasDeals ? onClick : undefined}
-      onMouseEnter={() => { if (hasDeals && inMonth) setHovered(true); }}
+      onClick={interactive ? onClick : undefined}
+      onMouseEnter={() => { if (interactive) setHovered(true); }}
       onMouseLeave={() => setHovered(false)}
       className="relative flex flex-col items-start p-1.5 h-full text-left focus:outline-none"
       style={{
         background: bg,
-        boxShadow: isBirthday ? "inset 0 0 0 3px var(--color-terracotta)" : undefined,
-        cursor: hasDeals && inMonth ? "pointer" : "default",
+        boxShadow: isBirthday && !isPastDay ? "inset 0 0 0 3px var(--color-terracotta)" : undefined,
+        cursor: interactive ? "pointer" : "default",
         transition: "background 150ms ease",
+        opacity: isPastDay ? 0.45 : 1,
       }}
     >
       {/* date number */}
@@ -143,7 +152,7 @@ function DayCell({
           background: today ? "var(--color-terracotta)" : "transparent",
           color: today ? "var(--color-cream)" : isBirthday ? "var(--color-terracotta)" : "var(--color-forest)",
           fontWeight: today || isBirthday ? 800 : 500,
-          opacity: !inMonth ? undefined : isEmptyInMonth ? 0.45 : undefined,
+          opacity: !inMonth ? undefined : (isEmptyInMonth && !isPastDay) ? 0.45 : undefined,
         }}
       >
         {label}
