@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { format, addMonths, subMonths, getMonth, getYear, setMonth, setYear } from "date-fns";
-import { Map, Cake, CakeSlice } from "lucide-react";
+import { Map, Cake, CakeSlice, CalendarDays } from "lucide-react";
 import { BIRTHDAY_KEY } from "@/components/BirthdayForm";
 import MonthView from "@/components/calendar/MonthView";
 import type { DealWithOccurrences } from "@/lib/deals";
@@ -144,6 +144,16 @@ export default function CalendarPage() {
             aria-label="next month"
           >
             ›
+          </button>
+          <button
+            onClick={() => { directionRef.current = now > cursor ? 1 : -1; setCursor(new Date()); }}
+            disabled={getMonth(cursor) === getMonth(now) && getYear(cursor) === getYear(now)}
+            className="p-1.5 rounded-lg transition-all duration-150 hover:bg-[var(--muted)] disabled:opacity-0 disabled:pointer-events-none"
+            style={{ color: "var(--color-forest)" }}
+            aria-label="Jump to today"
+            title="Back to today"
+          >
+            <CalendarDays size={16} strokeWidth={2} />
           </button>
           <button
             onClick={() => { directionRef.current = bdayTarget > cursor ? 1 : -1; setCursor(bdayTarget); }}
