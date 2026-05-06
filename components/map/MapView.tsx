@@ -161,6 +161,7 @@ export default function MapView({
 
   const [pins, setPins]         = useState<RestaurantPin[]>([]);
   const [pinsLoading, setPinsLoading] = useState(true);
+  const [pinsError, setPinsError]   = useState(false);
   const [isEmpty, setIsEmpty]   = useState(false);
   const [selectedFeature, setSelectedFeature] = useState<{
     pin: RestaurantPin;
@@ -177,7 +178,7 @@ export default function MapView({
     fetch("/api/restaurants")
       .then((r) => r.json())
       .then((data) => { setPins(data); setPinsLoading(false); })
-      .catch(() => setPinsLoading(false));
+      .catch(() => { setPinsLoading(false); setPinsError(true); });
   }, []);
 
   // Init map + source + layers (runs once)
@@ -396,6 +397,21 @@ export default function MapView({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {pinsError && (
+        <div
+          className="absolute top-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 rounded-full px-4 py-2"
+          style={{
+            background: "var(--card)",
+            border: "1px solid var(--border)",
+            boxShadow: "0 2px 12px rgba(0,0,0,0.10)",
+          }}
+        >
+          <span className="text-xs font-medium" style={{ color: "var(--color-terracotta)" }}>
+            Couldn't load deals — try refreshing
+          </span>
+        </div>
+      )}
 
       <AnimatePresence>
         {isEmpty && (
