@@ -42,7 +42,7 @@ export default function MonthView({
   const isFirstLoad = loading && Object.keys(dayMap).length === 0;
 
   return (
-    <div className="w-full flex flex-col flex-1" style={{ opacity: !isFirstLoad && loading ? 0.5 : 1, transition: "opacity 0.2s" }}>
+    <div className="w-full flex flex-col flex-1">
       {/* day-of-week headers */}
       <div className="grid grid-cols-7 mb-1 shrink-0">
         {DAY_HEADERS.map((d) => (
