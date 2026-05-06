@@ -81,7 +81,19 @@ export default function BirthdayForm({ onDatePick }: BirthdayFormProps) {
 
   const today = new Date();
 
-  if (loading) return null;
+  if (loading) return (
+    <div
+      className="fixed inset-0 flex items-center justify-center"
+      style={{ background: "var(--color-cream)" }}
+    >
+      <span
+        className="text-3xl font-black tracking-tighter"
+        style={{ color: "var(--color-terracotta)", opacity: 0.25 }}
+      >
+        free<span style={{ color: "var(--color-forest)" }}>bites</span>
+      </span>
+    </div>
+  );
 
   return (
     // Form card — soft shadow lifts it off the warm background
