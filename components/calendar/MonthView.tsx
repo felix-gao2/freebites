@@ -160,8 +160,9 @@ function DayCell({
 
       {/* skeleton shimmer */}
       {inMonth && skeleton && (
-        <div className="mt-1 w-full flex flex-col gap-0.5">
-          <div className="h-2 rounded-full animate-pulse" style={{ background: "var(--muted)", width: "65%" }} />
+        <div className="mt-1.5 w-full flex flex-col gap-1">
+          <div className="h-3.5 rounded-full animate-pulse" style={{ background: "var(--border)", width: "72%" }} />
+          <div className="h-3.5 rounded-full animate-pulse" style={{ background: "var(--border)", width: "50%", animationDelay: "150ms" }} />
         </div>
       )}
 
