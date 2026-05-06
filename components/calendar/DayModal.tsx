@@ -221,36 +221,42 @@ export default function DayModal({
           </>
         )}
 
-        {/* filter row */}
-        <div
-          className="flex items-center gap-2.5 px-4 py-3 border-b overflow-x-auto shrink-0"
-          style={{ borderColor: "var(--border)", scrollbarWidth: "none" }}
-        >
-          {/* Tier */}
-          <Chip label="All"                active={tier === "all" && category === "all" && signup === "all"} onClick={() => { setTier("all"); setCategory("all"); setSignup("all"); }} />
-          <Chip label="Truly Free"         active={tier === "truly_free"}    onClick={() => setTier(tier === "truly_free"    ? "all" : "truly_free")} />
-          <Chip label="Free with Purchase" active={tier === "with_purchase"} onClick={() => setTier(tier === "with_purchase" ? "all" : "with_purchase")} />
-
-          <Sep />
-
-          {/* Signup */}
-          <Chip label="No prep needed" active={signup === "no_prep"} onClick={() => setSignup(signup === "no_prep" ? "all" : "no_prep")} />
-
-          <Sep />
-
-          {/* Category */}
-          {ALL_CATEGORIES.map((cat) => (
-            <Chip
-              key={cat}
-              label={CATEGORY_LABELS[cat]}
-              active={category === cat}
-              onClick={() => setCategory(category === cat ? "all" : cat)}
-            />
-          ))}
-        </div>
+        {/* filter row — only shown when there are deals to filter */}
+        {deals.length > 0 && (
+          <div
+            className="flex items-center gap-2.5 px-4 py-3 border-b overflow-x-auto shrink-0"
+            style={{ borderColor: "var(--border)", scrollbarWidth: "none" }}
+          >
+            <Chip label="All"                active={tier === "all" && category === "all" && signup === "all"} onClick={() => { setTier("all"); setCategory("all"); setSignup("all"); }} />
+            <Chip label="Truly Free"         active={tier === "truly_free"}    onClick={() => setTier(tier === "truly_free"    ? "all" : "truly_free")} />
+            <Chip label="Free with Purchase" active={tier === "with_purchase"} onClick={() => setTier(tier === "with_purchase" ? "all" : "with_purchase")} />
+            <Sep />
+            <Chip label="No prep needed" active={signup === "no_prep"} onClick={() => setSignup(signup === "no_prep" ? "all" : "no_prep")} />
+            <Sep />
+            {ALL_CATEGORIES.map((cat) => (
+              <Chip
+                key={cat}
+                label={CATEGORY_LABELS[cat]}
+                active={category === cat}
+                onClick={() => setCategory(category === cat ? "all" : cat)}
+              />
+            ))}
+          </div>
+        )}
 
         {/* deal list */}
         <div className="overflow-y-auto flex-1 px-4 py-3">
+          {deals.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-14 gap-2">
+              <span className="text-4xl">🍽️</span>
+              <p className="text-sm font-medium" style={{ color: "var(--color-warm-gray)" }}>
+                No free food on this day
+              </p>
+              <p className="text-xs opacity-60" style={{ color: "var(--color-warm-gray)" }}>
+                Check another day for deals
+              </p>
+            </div>
+          ) : (
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={filterKey}
@@ -291,6 +297,7 @@ export default function DayModal({
               )}
             </motion.div>
           </AnimatePresence>
+          )}
         </div>
       </motion.div>
     </>
