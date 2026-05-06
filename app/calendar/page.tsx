@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { format, addMonths, subMonths, getMonth, getYear, setMonth, setYear } from "date-fns";
 import { Map, Cake, CakeSlice } from "lucide-react";
 import { BIRTHDAY_KEY } from "@/components/BirthdayForm";
@@ -15,6 +15,7 @@ export default function CalendarPage() {
   const router = useRouter();
   const [birthday, setBirthday] = useState<string | null>(null);
   const [cursor, setCursor] = useState(new Date());
+  const directionRef = useRef(1);
   const [dayMap, setDayMap] = useState<Record<string, DealWithOccurrences[]>>({});
   const [loadingDeals, setLoadingDeals] = useState(false);
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
@@ -124,7 +125,7 @@ export default function CalendarPage() {
         style={{ borderColor: "var(--border)" }}
       >
         <button
-          onClick={() => setCursor((c) => subMonths(c, 1))}
+          onClick={() => { directionRef.current = -1; setCursor((c) => subMonths(c, 1)); }}
           disabled={getMonth(cursor) === getMonth(now) && getYear(cursor) === getYear(now)}
           className="text-xl px-3 py-1 rounded-lg transition-colors hover:bg-[var(--muted)] disabled:opacity-25 disabled:pointer-events-none"
           style={{ color: "var(--color-forest)" }}
@@ -137,7 +138,7 @@ export default function CalendarPage() {
         </span>
         <div className="flex items-center gap-1">
           <button
-            onClick={() => setCursor((c) => addMonths(c, 1))}
+            onClick={() => { directionRef.current = 1; setCursor((c) => addMonths(c, 1)); }}
             className="text-xl px-3 py-1 rounded-lg transition-colors hover:bg-[var(--muted)]"
             style={{ color: "var(--color-forest)" }}
             aria-label="next month"
@@ -145,7 +146,7 @@ export default function CalendarPage() {
             ›
           </button>
           <button
-            onClick={() => setCursor(bdayTarget)}
+            onClick={() => { directionRef.current = bdayTarget > cursor ? 1 : -1; setCursor(bdayTarget); }}
             disabled={onBdayMonth}
             className="p-1.5 rounded-lg transition-all duration-150 hover:bg-[var(--muted)] disabled:opacity-0 disabled:pointer-events-none"
             style={{ color: "var(--color-terracotta)" }}
@@ -158,14 +159,25 @@ export default function CalendarPage() {
       </div>
 
       {/* ── calendar body ── */}
-      <div className="flex-1 p-4 flex flex-col">
-        <MonthView
-          cursor={cursor}
-          birthday={birthday}
-          dayMap={dayMap}
-          loading={loadingDeals}
-          onDayClick={setSelectedDay}
-        />
+      <div className="flex-1 p-4 flex flex-col overflow-hidden">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={format(cursor, "yyyy-MM")}
+            initial={{ opacity: 0, x: directionRef.current * 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: directionRef.current * -20 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="flex-1 flex flex-col"
+          >
+            <MonthView
+              cursor={cursor}
+              birthday={birthday}
+              dayMap={dayMap}
+              loading={loadingDeals}
+              onDayClick={setSelectedDay}
+            />
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* ── day modal ── */}

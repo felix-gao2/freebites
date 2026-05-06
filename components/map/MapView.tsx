@@ -203,12 +203,36 @@ export default function MapView({
       // Use any data that arrived before the style loaded
       const initialData = pendingRef.current?.geojson ?? { type: "FeatureCollection" as const, features: [] };
 
+      let hoveredClusterId: string | number | null = null;
+
       map.addSource("restaurants", {
         type: "geojson",
         data: initialData,
         cluster: true,
         clusterRadius: 50,
         clusterMaxZoom: 14,
+        generateId: true,
+      });
+
+      // Cluster shadow (behind clusters, fades in on hover)
+      map.addLayer({
+        id: "cluster-shadow",
+        type: "circle",
+        source: "restaurants",
+        filter: ["has", "point_count"],
+        paint: {
+          "circle-color": "#000000",
+          "circle-translate": [0, 4],
+          "circle-blur": 0.8,
+          "circle-radius": [
+            "case", ["boolean", ["feature-state", "hover"], false],
+            ["step", ["get", "point_count"], 28, 10, 34, 50, 42],
+            ["step", ["get", "point_count"], 20, 10, 25, 50, 30],
+          ],
+          "circle-opacity": ["case", ["boolean", ["feature-state", "hover"], false], 0.15, 0],
+          "circle-radius-transition": { duration: 150, delay: 0 },
+          "circle-opacity-transition": { duration: 150, delay: 0 },
+        },
       });
 
       // Cluster circles
@@ -219,9 +243,14 @@ export default function MapView({
         filter: ["has", "point_count"],
         paint: {
           "circle-color": TIER1_COLOR,
-          "circle-radius": ["step", ["get", "point_count"], 20, 10, 25, 50, 30],
+          "circle-radius": [
+            "case", ["boolean", ["feature-state", "hover"], false],
+            ["step", ["get", "point_count"], 21.6, 10, 27, 50, 32.4],
+            ["step", ["get", "point_count"], 20, 10, 25, 50, 30],
+          ],
           "circle-stroke-width": 2,
           "circle-stroke-color": "#ffffff",
+          "circle-radius-transition": { duration: 150, delay: 0 },
         },
       });
 
@@ -296,8 +325,24 @@ export default function MapView({
         if (!hits.length) setSelectedFeature(null);
       });
 
-      map.on("mouseenter", "clusters",          () => { map.getCanvas().style.cursor = "pointer"; });
-      map.on("mouseleave", "clusters",          () => { map.getCanvas().style.cursor = ""; });
+      map.on("mouseenter", "clusters", (e) => {
+        map.getCanvas().style.cursor = "pointer";
+        const f = e.features?.[0];
+        if (f?.id != null) {
+          if (hoveredClusterId != null) {
+            map.setFeatureState({ source: "restaurants", id: hoveredClusterId }, { hover: false });
+          }
+          hoveredClusterId = f.id;
+          map.setFeatureState({ source: "restaurants", id: f.id }, { hover: true });
+        }
+      });
+      map.on("mouseleave", "clusters", () => {
+        map.getCanvas().style.cursor = "";
+        if (hoveredClusterId != null) {
+          map.setFeatureState({ source: "restaurants", id: hoveredClusterId }, { hover: false });
+          hoveredClusterId = null;
+        }
+      });
       map.on("mouseenter", "unclustered-point", () => { map.getCanvas().style.cursor = "pointer"; });
       map.on("mouseleave", "unclustered-point", () => { map.getCanvas().style.cursor = ""; });
     });

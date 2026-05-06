@@ -216,7 +216,7 @@ function Chip({ label, active, onClick }: { label: string; active: boolean; onCl
   return (
     <button
       onClick={onClick}
-      className="shrink-0 text-sm font-medium rounded-full px-4 py-1.5 border whitespace-nowrap transition-colors"
+      className="shrink-0 text-sm font-medium rounded-full px-4 py-1.5 border whitespace-nowrap transition-all duration-100 active:scale-[0.97]"
       style={{
         borderColor: active ? "var(--color-terracotta)" : "var(--border)",
         background:  active ? "var(--color-terracotta)" : "transparent",
