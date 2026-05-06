@@ -89,7 +89,7 @@ export default function MapPage() {
         </Link>
 
         {/* center: tagline */}
-        <p className="text-sm font-medium" style={{ color: "var(--color-warm-gray)" }}>
+        <p className="text-base font-medium" style={{ color: "var(--color-warm-gray)" }}>
           Your free food calendar for the GTA
         </p>
 
