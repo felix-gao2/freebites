@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# freebites
+Personalized free food calendar for the Greater Toronto Area. Enter your birthday once and get a year-round calendar of every free food deal available, birthday freebies, national food days, and recurring weekly specials. No account required.
 
+## Features
+- Calendar view with month grid showing every deal day, colour-coded by type, with bottom-sheet detail modals
+- Map view with custom Mapbox pins per restaurant category and live filter/search over 56 locations
+- Birthday-aware validity engine computing 6 distinct window types per chain
+- Filter by tier (free, free with purchase, discount), signup type, and category
+- localStorage-based user state, zero auth, no tracking
+
+## Tech Stack
+- **Framework**: Next.js 16 (App Router), TypeScript
+- **Styling**: Tailwind CSS 4, shadcn/ui
+- **Database**: PostgreSQL (Neon serverless) via Prisma 7.8
+- **Maps**: Mapbox GL JS 3
+- **Animation**: Framer Motion 12
+- **Dates**: date-fns 4
+- **Testing**: Vitest
+- **Deployment**: Vercel
+
+## Data
+- 56 GTA restaurant chains across 6 categories (Coffee & Drinks, Bakeries & Sweets, Fast Food, Sit-Down, Ice Cream, Convenience)
+- 110+ verified deals, 67 birthday freebies, 43 national food days, plus recurring weekly specials
+- 3 deal tiers: Tier 1 (truly free), Tier 2 (free with purchase), Tier 3 (deals/discounts)
+
+## Validity Engine
+
+Birthday deals support 6 window types, computed per user per month:
+
+| Type | Example |
+|---|---|
+| `birthday_only` | Exact birthday only |
+| `days_around` | 7 days before → 7 days after (Chatime) |
+| `birthday_month` | Entire birth month (Buffalo Wild Wings) |
+| `days_from_birthday` | Birthday → 1 day, lasting 30 days (Krispy Kreme) |
+| `weeks_after` | Birthday through 6 weeks later (Crumbl) |
+| `month_from_birthday` | Birthday through same date next month (Lindt) |
+
+Cross-year boundaries handled (e.g. Dec 28 birthday with a 30-day window rolling into January). 150+ Vitest unit tests cover all edge cases.
 ## Getting Started
+**Prerequisites**: Node.js 18+, PostgreSQL database (Neon or Supabase), Mapbox account
 
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+git clone https://github.com/your-username/freebites
+cd freebites
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Environment Variables
+Create `.env.local` with:
+```
+DATABASE_URL=your_postgres_url
+NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token
+```
+### Database Setup
+```
+npx prisma generate
+npx prisma db push
+npx prisma db seed
+```
+### Run
+```
+npm run dev
+```
